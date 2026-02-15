@@ -1,30 +1,33 @@
-import { auth } from "/firebase-config.js";
-
+import { auth } from "./firebase-config.js";
 import {
   GoogleAuthProvider,
   signInWithRedirect,
-  onAuthStateChanged,
-  setPersistence,
-  browserLocalPersistence
+  getRedirectResult,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
-await setPersistence(auth, browserLocalPersistence);
-
 const provider = new GoogleAuthProvider();
-provider.setCustomParameters({ prompt: "select_account" });
 
-export function connectGoogleLogin(buttonId) {
-  window.addEventListener("DOMContentLoaded", () => {
-    const btn = document.getElementById(buttonId);
-    if (!btn) return;
+export function connectGoogleLogin(btnId) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
 
-    btn.onclick = () => {
-      signInWithRedirect(auth, provider);
-    };
-  });
+  btn.onclick = () => {
+    console.log("Redirecting to Google...");
+    signInWithRedirect(auth, provider);
+  };
 }
 
-export function detectUser(callback) {
+// detect login AFTER returning from Google
+export async function detectUser(callback) {
+
+  // when coming back from Google
+  const result = await getRedirectResult(auth);
+  if (result?.user) {
+    console.log("Returned from Google:", result.user.email);
+  }
+
+  // detect active session
   onAuthStateChanged(auth, (user) => {
     callback(user);
   });
