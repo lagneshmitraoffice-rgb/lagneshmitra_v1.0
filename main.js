@@ -1,41 +1,34 @@
-import { auth } from "/firebase-config.js";
+console.log("MAIN ENGINE START 🚀");
 
 import {
-  GoogleAuthProvider,
-  signInWithRedirect,
-  getRedirectResult,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-
-const provider = new GoogleAuthProvider();
-
-const btn = document.getElementById("loginBtn");
-const status = document.getElementById("status");
-
-// 👇 STEP 1 — Button click
-if (btn) {
-  btn.onclick = () => {
-    signInWithRedirect(auth, provider);
-  };
-}
-
-// 👇 STEP 2 — VERY IMPORTANT (redirect result handler)
-getRedirectResult(auth)
-  .then((result) => {
-    if (result?.user) {
-      console.log("Redirect login success");
-      window.location.href = "/ideology.html";
-    }
-  })
-  .catch((err) => console.log(err));
+  connectGoogleLogin,
+  detectUser,
+  handleRedirectLogin
+} from "./auth.js";
 
 
-// 👇 STEP 3 — Session detect (refresh ke baad)
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    console.log("User session active");
-    if (window.location.pathname.includes("index")) {
-      window.location.href = "/ideology.html";
-    }
+// ⭐ MOST IMPORTANT LINE
+await handleRedirectLogin();
+
+
+// connect login button
+connectGoogleLogin("loginBtn");
+
+
+// detect login and redirect
+detectUser((user) => {
+
+  if (!user) {
+    console.log("User not logged in");
+    return;
   }
+
+  console.log("User logged in:", user.email);
+
+  const path = window.location.pathname;
+
+  if (path === "/" || path.includes("index")) {
+    window.location.href = "/ideology.html";
+  }
+
 });
