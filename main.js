@@ -1,3 +1,4 @@
+alert("MAIN JS LOADED");
 console.log("MAIN ENGINE START 🚀");
 
 import { auth } from "./firebase-config.js";
