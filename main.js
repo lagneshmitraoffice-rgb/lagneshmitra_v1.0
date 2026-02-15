@@ -1,34 +1,33 @@
-console.log("MAIN ENGINE START 🚀");
+import { auth } from "./firebase-config.js";
 
 import {
-  connectGoogleLogin,
-  detectUser,
-  handleRedirectLogin
-} from "./auth.js";
+  GoogleAuthProvider,
+  signInWithPopup
+} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
+alert("MAIN JS LOADED"); // mobile test
 
-// ⭐ MOST IMPORTANT LINE
-await handleRedirectLogin();
+const provider = new GoogleAuthProvider();
 
+window.addEventListener("DOMContentLoaded", () => {
 
-// connect login button
-connectGoogleLogin("loginBtn");
+  const btn = document.getElementById("loginBtn");
 
-
-// detect login and redirect
-detectUser((user) => {
-
-  if (!user) {
-    console.log("User not logged in");
+  if (!btn) {
+    alert("Button not found");
     return;
   }
 
-  console.log("User logged in:", user.email);
-
-  const path = window.location.pathname;
-
-  if (path === "/" || path.includes("index")) {
-    window.location.href = "/ideology.html";
-  }
+  btn.onclick = async () => {
+    try {
+      alert("Opening Google popup...");
+      const result = await signInWithPopup(auth, provider);
+      alert("SUCCESS: " + result.user.email);
+    }
+    catch (err) {
+      alert("ERROR: " + err.message);
+      console.log(err);
+    }
+  };
 
 });
