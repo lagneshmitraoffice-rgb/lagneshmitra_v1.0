@@ -1,14 +1,30 @@
+// 🔥 Firebase Core
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
+// 🔐 Firebase Auth
+import { getAuth, GoogleAuthProvider } 
+from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+
+// ⭐ YOUR NEW FIREBASE PROJECT CONFIG
+// (jo naya project banaya hai uska)
 const firebaseConfig = {
-  apiKey: "AIzaSyDvxM3XH5IOm66i_bZ4PIhwkDGU3Dq5diE",
-  authDomain: "lagneshmitra-e57b8.firebaseapp.com",
-  projectId: "lagneshmitra-e57b8",
-  storageBucket: "lagneshmitra-e57b8.firebasestorage.app",
-  messagingSenderId: "420798143606",
-  appId: "1:420798143606:web:5c61b76b311161f4415357"
+  apiKey: "PASTE_API_KEY_HERE",
+  authDomain: "PASTE_AUTH_DOMAIN.firebaseapp.com",
+  projectId: "PASTE_PROJECT_ID"
 };
 
+
+// 🔥 Initialize Firebase
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+
+// 🔐 Initialize Auth
+const auth = getAuth(app);
+
+// 🔥 Google Provider
+const provider = new GoogleAuthProvider();
+provider.setCustomParameters({ prompt: "select_account" });
+
+
+// ⭐ EXPORT FOR APP
+export { auth, provider };
