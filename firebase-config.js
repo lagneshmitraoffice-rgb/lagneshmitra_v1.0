@@ -1,15 +1,13 @@
-// Firebase CDN v12 ONLY
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "PASTE_NEW_KEY",
-  authDomain: "PASTE_PROJECT.firebaseapp.com",
-  projectId: "PASTE_PROJECT_ID",
-  storageBucket: "PASTE.appspot.com",
-  messagingSenderId: "XXXX",
-  appId: "XXXX"
+  apiKey: "PASTE_REAL_API_KEY",
+  authDomain: "PASTE_REAL.firebaseapp.com",
+  projectId: "PASTE_REAL",
+  storageBucket: "PASTE_REAL.appspot.com",
+  messagingSenderId: "PASTE_REAL",
+  appId: "PASTE_REAL"
 };
 
 const app = initializeApp(firebaseConfig);
