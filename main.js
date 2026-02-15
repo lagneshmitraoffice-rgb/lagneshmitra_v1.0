@@ -1,6 +1,5 @@
-console.log("MAIN JS LOADED 🚀");
+console.log("MAIN ENGINE START 🚀");
 
-// Firebase auth import
 import { auth } from "./firebase-config.js";
 
 import {
@@ -11,8 +10,7 @@ import {
   browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
-
-// 🔥 Mobile persistence (VERY IMPORTANT)
+// 🔥 mobile persistence
 await setPersistence(auth, browserLocalPersistence);
 
 // Google provider
@@ -20,35 +18,34 @@ const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });
 
 
-// 🔥 CONNECT LOGIN BUTTON
+// 🔘 CONNECT BUTTON
 window.addEventListener("DOMContentLoaded", () => {
-  console.log("DOM READY");
+  console.log("Connecting login button...");
 
   const btn = document.getElementById("loginBtn");
 
   if (!btn) {
-    alert("Login button NOT FOUND ❌");
+    console.log("Login button not found");
     return;
   }
 
-  alert("Login button connected ✅");
-
-  btn.addEventListener("click", () => {
-    alert("Redirecting to Google 🚀");
+  btn.onclick = () => {
+    console.log("Redirecting to Google...");
     signInWithRedirect(auth, provider);
-  });
+  };
 });
 
 
-// 🔥 AFTER LOGIN REDIRECT
+// 👀 DETECT LOGIN
 onAuthStateChanged(auth, (user) => {
 
   if (!user) {
-    console.log("No user session");
+    console.log("No session yet");
     return;
   }
 
   console.log("User logged in:", user.email);
 
-  window.location.href = "/ideology.html";
+  // redirect to ideology page
+  window.location.href = "ideology.html";
 });
