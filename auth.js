@@ -1,15 +1,25 @@
+console.log("AUTH ENGINE START 🔥");
+
 import { auth } from "./firebase-config.js";
+
 import {
   GoogleAuthProvider,
   signInWithRedirect,
   getRedirectResult,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+  onAuthStateChanged,
+  setPersistence,
+  browserLocalPersistence
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+await setPersistence(auth, browserLocalPersistence);
 
 const provider = new GoogleAuthProvider();
+provider.setCustomParameters({ prompt: "select_account" });
 
-export function connectGoogleLogin(btnId) {
-  const btn = document.getElementById(btnId);
+
+// 🔥 LOGIN BUTTON CONNECT
+export function connectGoogleLogin(buttonId) {
+  const btn = document.getElementById(buttonId);
   if (!btn) return;
 
   btn.onclick = () => {
@@ -18,16 +28,26 @@ export function connectGoogleLogin(btnId) {
   };
 }
 
-// detect login AFTER returning from Google
-export async function detectUser(callback) {
 
-  // when coming back from Google
-  const result = await getRedirectResult(auth);
-  if (result?.user) {
-    console.log("Returned from Google:", result.user.email);
+// 🔥 THIS WAS MISSING !!!!!!!
+export async function handleRedirectLogin() {
+  try {
+    const result = await getRedirectResult(auth);
+
+    if (result?.user) {
+      console.log("Redirect login success:", result.user.email);
+    } else {
+      console.log("No redirect result");
+    }
+
+  } catch (error) {
+    console.error("Redirect error:", error);
   }
+}
 
-  // detect active session
+
+// 🔥 USER SESSION DETECTOR
+export function detectUser(callback) {
   onAuthStateChanged(auth, (user) => {
     callback(user);
   });
