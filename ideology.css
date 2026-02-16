@@ -1,67 +1,142 @@
+/* ===== GLOBAL ===== */
 body{
   margin:0;
   background:#000;
   color:white;
-  font-family:Arial;
+  font-family:Arial, Helvetica, sans-serif;
 }
 
-/* TOP BAR */
+/* ===== TOP BAR ===== */
 .topbar{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:15px 30px;
-  background:#111;
+  padding:14px 22px;
+  background:#0b0b0b;
   border-bottom:1px solid #222;
+  position:sticky;
+  top:0;
+  z-index:999;
 }
 
+/* LOGO */
 .logo{
-  font-size:22px;
-  color:gold;
+  font-size:24px;
+  color:#FFC107;
   font-weight:bold;
+  letter-spacing:1px;
 }
 
+/* USER BOX */
 .userBox{
   display:flex;
   align-items:center;
-  gap:15px;
+  gap:12px;
 }
 
+/* GOOGLE PROFILE IMAGE FIX */
 .userBox img{
-  width:45px;
-  height:45px;
+  width:42px;
+  height:42px;
   border-radius:50%;
+  border:2px solid #FFC107;
+  object-fit:cover;
 }
 
+/* USER TEXT */
+#userName{
+  font-size:14px;
+  font-weight:bold;
+}
+
+#userEmail{
+  font-size:11px;
+  color:#aaa;
+}
+
+/* LOGOUT BUTTON */
 #logoutBtn{
-  background:red;
+  background:#FFC107;
   border:none;
-  padding:8px 14px;
-  color:white;
+  padding:7px 14px;
+  color:#000;
+  font-weight:bold;
+  border-radius:6px;
   cursor:pointer;
+  transition:0.2s;
 }
 
-/* SLIDER */
+#logoutBtn:hover{
+  transform:scale(1.05);
+}
+
+/* ===== SLIDER ===== */
 .slider{
   text-align:center;
   margin-top:30px;
+  padding-bottom:40px;
 }
 
+/* IMAGE */
 #pageImage{
-  width:90%;
-  max-width:500px;
-  border-radius:10px;
-  box-shadow:0 0 40px rgba(255,215,0,0.3);
+  width:92%;
+  max-width:420px;
+  border-radius:16px;
+  box-shadow:0 0 40px rgba(255,193,7,0.25);
 }
 
+/* CONTROLS */
 .controls{
   margin-top:20px;
 }
 
+/* BUTTONS */
 .controls button{
   padding:10px 18px;
   margin:10px;
-  background:gold;
+  background:#FFC107;
   border:none;
+  font-weight:bold;
   cursor:pointer;
+  border-radius:6px;
+  transition:0.2s;
+}
+
+.controls button:hover{
+  transform:scale(1.05);
+}
+
+/* PAGE COUNTER */
+#pageIndicator{
+  font-weight:bold;
+  color:white;
+}
+
+/* ===== MOBILE OPTIMIZATION ===== */
+@media(max-width:600px){
+
+  .topbar{
+    padding:12px 14px;
+  }
+
+  .logo{
+    font-size:20px;
+  }
+
+  .userBox{
+    gap:8px;
+  }
+
+  #userName{
+    font-size:12px;
+  }
+
+  #userEmail{
+    display:none; /* mobile pe clutter remove */
+  }
+
+  #logoutBtn{
+    padding:6px 10px;
+    font-size:12px;
+  }
 }
