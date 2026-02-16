@@ -4,7 +4,10 @@ import {
   signOut
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
-/* 🔥 IMAGE SLIDER */
+/* =====================================
+   🔥 IMAGE SLIDER ENGINE
+===================================== */
+
 const images = [
   "Ideology1.jpg",
   "Ideology2.jpg",
@@ -14,36 +17,83 @@ const images = [
 ];
 
 let current = 0;
+
 const img = document.getElementById("pageImage");
 const indicator = document.getElementById("pageIndicator");
+const nextBtn = document.getElementById("nextBtn");
+const prevBtn = document.getElementById("prevBtn");
 
 function updatePage(){
   img.src = images[current];
   indicator.innerText = `Page ${current+1} / ${images.length}`;
+
+  /* disable buttons at edges */
+  prevBtn.style.opacity = current === 0 ? "0.4" : "1";
+  nextBtn.style.opacity = current === images.length-1 ? "0.4" : "1";
 }
+
 updatePage();
 
-document.getElementById("nextBtn").onclick=()=>{
-  if(current < images.length-1){ current++; updatePage(); }
-};
-document.getElementById("prevBtn").onclick=()=>{
-  if(current > 0){ current--; updatePage(); }
+/* NEXT */
+nextBtn.onclick = ()=>{
+  if(current < images.length-1){
+    current++;
+    updatePage();
+  }
 };
 
-/* 🔐 LOGIN GUARD */
+/* PREVIOUS */
+prevBtn.onclick = ()=>{
+  if(current > 0){
+    current--;
+    updatePage();
+  }
+};
+
+
+/* =====================================
+   🔐 AUTH GUARD + USER DATA INJECTION
+===================================== */
+
+const nameEl  = document.getElementById("userName");
+const emailEl = document.getElementById("userEmail");
+const photoEl = document.getElementById("userPhoto");
+
 onAuthStateChanged(auth,(user)=>{
+
+  /* 🚫 NOT LOGGED IN → BACK TO LOGIN */
   if(!user){
-    window.location.href="/";
+    window.location.href = "/";
     return;
   }
 
-  document.getElementById("userName").innerText=user.displayName;
-  document.getElementById("userEmail").innerText=user.email;
-  document.getElementById("userPhoto").src=user.photoURL;
+  /* 👤 USER INFO SAFE INJECTION */
+  nameEl.innerText  = user.displayName || "User";
+  emailEl.innerText = user.email || "";
+
+  /* Google photo fallback */
+  if(user.photoURL){
+    photoEl.src = user.photoURL;
+  }else{
+    photoEl.src = "https://i.imgur.com/6VBx3io.png"; // default avatar
+  }
+
 });
 
-/* 🚪 LOGOUT */
-document.getElementById("logoutBtn").onclick=async ()=>{
-  await signOut(auth);
-  window.location.href="/";
+
+/* =====================================
+   🚪 LOGOUT SYSTEM
+===================================== */
+
+const logoutBtn = document.getElementById("logoutBtn");
+
+logoutBtn.onclick = async ()=>{
+  try{
+    await signOut(auth);
+    window.location.href = "/";
+  }
+  catch(err){
+    alert("Logout error");
+    console.error(err);
+  }
 };
