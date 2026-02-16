@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>LagneshMitra Ideology</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link rel="stylesheet" href="ideology.css">
 </head>
 
@@ -44,48 +43,37 @@
 
 
 <!-- =======================================================
-   🚀 COMMUNITY ONBOARDING POPUP (FULL FORM)
+🚀 NEW USER ONBOARDING POPUP (FULL VERSION)
 ======================================================= -->
+
 <div id="onboardPopup">
   <div class="popupCard">
 
-    <h2>Join LagneshMitra</h2>
+    <h2>Join LagneshMitra Community</h2>
 
-    <!-- 👤 PROFILE PIC -->
-    <div class="profileUpload">
-      <img id="previewPic" src="https://i.imgur.com/6VBx3io.png">
-      <input type="file" id="profilePicInput" accept="image/*">
-    </div>
-
-    <!-- BASIC INFO -->
     <input id="fullNameInput" placeholder="Full Name *">
-    <input id="emailInput" placeholder="Email *">
     <input id="whatsappInput" placeholder="WhatsApp Number *">
 
-    <!-- BIRTH DETAILS -->
     <input id="dobInput" type="date" placeholder="Date of Birth *">
     <input id="tobInput" type="time" placeholder="Time of Birth *">
     <input id="pobInput" placeholder="Place of Birth *">
+    <input id="countryInput" placeholder="Country">
 
-    <!-- COUNTRY -->
-    <input id="countryInput" placeholder="Country *">
-
-    <!-- CHECKBOX CONSENTS -->
-    <div class="checkboxGroup">
+    <div style="text-align:left;margin-top:15px;font-size:13px">
 
       <label>
         <input type="checkbox" id="partnerCheck">
-        Interested in future Contribution Program
-      </label>
+        Interested in future contribution program
+      </label><br><br>
 
       <label>
-        <input type="checkbox" id="whatsappConsent">
-        Ok to communicate via WhatsApp
-      </label>
+        <input type="checkbox" id="whatsappConsent" checked>
+        OK to communicate on WhatsApp
+      </label><br><br>
 
       <label>
-        <input type="checkbox" id="updatesConsent">
-        Allow LagneshMitra to send updates
+        <input type="checkbox" id="updatesConsent" checked>
+        Send updates & announcements
       </label>
 
     </div>
