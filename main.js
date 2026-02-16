@@ -1,21 +1,26 @@
-import { auth, provider } from "./firebase-config.js";
-import { signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+// main.js
+import { auth } from "./firebase-config.js";
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const provider = new GoogleAuthProvider();
 
 const btn = document.getElementById("googleLogin");
 
 btn.addEventListener("click", async () => {
   try {
-    alert("Opening Google popup...");
-    
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
+    await signInWithPopup(auth, provider);
+  } catch (err) {
+    alert(err.message);
+  }
+});
 
-    alert("Welcome " + user.displayName);
-
-    // redirect to ideology page
+// Auto redirect if logged in
+onAuthStateChanged(auth, (user) => {
+  if (user) {
     window.location.href = "/ideology.html";
-
-  } catch (error) {
-    alert(error.message);
   }
 });
