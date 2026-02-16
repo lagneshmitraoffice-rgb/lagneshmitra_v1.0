@@ -1,33 +1,21 @@
-import { auth } from "./firebase-config.js";
+import { auth, provider } from "./firebase-config.js";
+import { signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-import {
-  GoogleAuthProvider,
-  signInWithPopup
-} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+const btn = document.getElementById("googleLogin");
 
-alert("MAIN JS LOADED"); // mobile test
+btn.addEventListener("click", async () => {
+  try {
+    alert("Opening Google popup...");
+    
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
 
-const provider = new GoogleAuthProvider();
+    alert("Welcome " + user.displayName);
 
-window.addEventListener("DOMContentLoaded", () => {
+    // redirect to ideology page
+    window.location.href = "/ideology.html";
 
-  const btn = document.getElementById("loginBtn");
-
-  if (!btn) {
-    alert("Button not found");
-    return;
+  } catch (error) {
+    alert(error.message);
   }
-
-  btn.onclick = async () => {
-    try {
-      alert("Opening Google popup...");
-      const result = await signInWithPopup(auth, provider);
-      alert("SUCCESS: " + result.user.email);
-    }
-    catch (err) {
-      alert("ERROR: " + err.message);
-      console.log(err);
-    }
-  };
-
 });
