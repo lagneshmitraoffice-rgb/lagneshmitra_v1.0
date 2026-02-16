@@ -1,8 +1,20 @@
 import { auth } from "./firebase-config.js";
+
 import {
   onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
+
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+const db = getFirestore();
+
 
 /* =====================================
    🔥 IMAGE SLIDER ENGINE
@@ -26,28 +38,16 @@ const prevBtn = document.getElementById("prevBtn");
 function updatePage(){
   img.src = images[current];
   indicator.innerText = `Page ${current+1} / ${images.length}`;
-
-  /* disable buttons at edges */
   prevBtn.style.opacity = current === 0 ? "0.4" : "1";
   nextBtn.style.opacity = current === images.length-1 ? "0.4" : "1";
 }
-
 updatePage();
 
-/* NEXT */
 nextBtn.onclick = ()=>{
-  if(current < images.length-1){
-    current++;
-    updatePage();
-  }
+  if(current < images.length-1){ current++; updatePage(); }
 };
-
-/* PREVIOUS */
 prevBtn.onclick = ()=>{
-  if(current > 0){
-    current--;
-    updatePage();
-  }
+  if(current > 0){ current--; updatePage(); }
 };
 
 
@@ -59,65 +59,99 @@ const nameEl  = document.getElementById("userName");
 const emailEl = document.getElementById("userEmail");
 const photoEl = document.getElementById("userPhoto");
 
-onAuthStateChanged(auth,(user)=>{
+let currentUser = null;
 
-  /* 🚫 NOT LOGGED IN → BACK TO LOGIN */
+onAuthStateChanged(auth, async (user)=>{
+
   if(!user){
     window.location.href = "/";
     return;
   }
 
-  /* 👤 USER INFO SAFE INJECTION */
+  currentUser = user;
+
   nameEl.innerText  = user.displayName || "User";
   emailEl.innerText = user.email || "";
+  photoEl.src = user.photoURL || "https://i.imgur.com/6VBx3io.png";
 
-  /* Google photo fallback */
-  if(user.photoURL){
-    photoEl.src = user.photoURL;
-  }else{
-    photoEl.src = "https://i.imgur.com/6VBx3io.png";
-  }
-
-  /* =====================================
-     🧠 FIRST TIME USER CHECK (ONBOARDING)
-  ===================================== */
+  /* 🔥 CHECK FIRESTORE PROFILE */
+  const docRef = doc(db,"lm_ideology_user_data", user.uid);
+  const docSnap = await getDoc(docRef);
 
   const popup = document.getElementById("onboardPopup");
-  const savedProfile = localStorage.getItem("lm_profile");
 
-  if(!savedProfile){
-    popup.style.display = "flex";
-
-    /* Prefill name if needed later */
-    document.getElementById("userName").innerText = user.displayName || "User";
+  if(!docSnap.exists()){
+    popup.style.display = "flex";   // first time user
   }else{
-    popup.style.display = "none";
+    popup.style.display = "none";   // existing user
+
+    // update last login silently
+    await setDoc(docRef,{
+      lastLogin: serverTimestamp()
+    },{merge:true});
   }
 
 });
 
 
 /* =====================================
-   💾 SAVE PROFILE (POPUP FORM)
+   💾 SAVE PROFILE → FIRESTORE
 ===================================== */
 
 const saveBtn = document.getElementById("saveProfile");
 
 if(saveBtn){
-  saveBtn.onclick = ()=>{
-    const profile = {
-      dob: document.getElementById("dob").value,
-      tob: document.getElementById("tob").value,
-      pob: document.getElementById("pob").value
-    };
+  saveBtn.onclick = async ()=>{
 
-    if(!profile.dob || !profile.tob || !profile.pob){
-      alert("Please fill all details");
+    const name  = document.getElementById("fullName").value;
+    const dob   = document.getElementById("dob").value;
+    const tob   = document.getElementById("tob").value;
+    const pob   = document.getElementById("pob").value;
+    const country = document.getElementById("country").value;
+    const whatsapp = document.getElementById("whatsapp").value;
+
+    const partnerInterest  = document.getElementById("partnerInterest").checked;
+    const whatsappConsent  = document.getElementById("whatsappConsent").checked;
+    const updatesConsent   = document.getElementById("updatesConsent").checked;
+
+    if(!name || !dob || !tob || !pob || !whatsapp || !country){
+      alert("Please fill all required details");
       return;
     }
 
-    localStorage.setItem("lm_profile", JSON.stringify(profile));
-    document.getElementById("onboardPopup").style.display = "none";
+    try{
+
+      const user = currentUser;
+
+      await setDoc(doc(db,"lm_ideology_user_data", user.uid),{
+
+        lmid: user.uid,
+        name,
+        email: user.email,
+        whatsapp,
+        country,
+        dob,
+        tob,
+        pob,
+
+        partnerInterest,
+        whatsappConsent,
+        updatesConsent,
+
+        photoURL: user.photoURL || "",
+        createdAt: serverTimestamp(),
+        lastLogin: serverTimestamp()
+
+      });
+
+      document.getElementById("onboardPopup").style.display = "none";
+      alert("Profile saved successfully 🚀");
+
+    }catch(err){
+      console.error(err);
+      alert("Error saving profile");
+    }
+
   };
 }
 
