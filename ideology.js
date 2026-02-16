@@ -75,10 +75,51 @@ onAuthStateChanged(auth,(user)=>{
   if(user.photoURL){
     photoEl.src = user.photoURL;
   }else{
-    photoEl.src = "https://i.imgur.com/6VBx3io.png"; // default avatar
+    photoEl.src = "https://i.imgur.com/6VBx3io.png";
+  }
+
+  /* =====================================
+     🧠 FIRST TIME USER CHECK (ONBOARDING)
+  ===================================== */
+
+  const popup = document.getElementById("onboardPopup");
+  const savedProfile = localStorage.getItem("lm_profile");
+
+  if(!savedProfile){
+    popup.style.display = "flex";
+
+    /* Prefill name if needed later */
+    document.getElementById("userName").innerText = user.displayName || "User";
+  }else{
+    popup.style.display = "none";
   }
 
 });
+
+
+/* =====================================
+   💾 SAVE PROFILE (POPUP FORM)
+===================================== */
+
+const saveBtn = document.getElementById("saveProfile");
+
+if(saveBtn){
+  saveBtn.onclick = ()=>{
+    const profile = {
+      dob: document.getElementById("dob").value,
+      tob: document.getElementById("tob").value,
+      pob: document.getElementById("pob").value
+    };
+
+    if(!profile.dob || !profile.tob || !profile.pob){
+      alert("Please fill all details");
+      return;
+    }
+
+    localStorage.setItem("lm_profile", JSON.stringify(profile));
+    document.getElementById("onboardPopup").style.display = "none";
+  };
+}
 
 
 /* =====================================
