@@ -1,0 +1,67 @@
+body{
+  margin:0;
+  background:#000;
+  color:white;
+  font-family:Arial;
+}
+
+/* TOP BAR */
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:15px 30px;
+  background:#111;
+  border-bottom:1px solid #222;
+}
+
+.logo{
+  font-size:22px;
+  color:gold;
+  font-weight:bold;
+}
+
+.userBox{
+  display:flex;
+  align-items:center;
+  gap:15px;
+}
+
+.userBox img{
+  width:45px;
+  height:45px;
+  border-radius:50%;
+}
+
+#logoutBtn{
+  background:red;
+  border:none;
+  padding:8px 14px;
+  color:white;
+  cursor:pointer;
+}
+
+/* SLIDER */
+.slider{
+  text-align:center;
+  margin-top:30px;
+}
+
+#pageImage{
+  width:90%;
+  max-width:500px;
+  border-radius:10px;
+  box-shadow:0 0 40px rgba(255,215,0,0.3);
+}
+
+.controls{
+  margin-top:20px;
+}
+
+.controls button{
+  padding:10px 18px;
+  margin:10px;
+  background:gold;
+  border:none;
+  cursor:pointer;
+}
