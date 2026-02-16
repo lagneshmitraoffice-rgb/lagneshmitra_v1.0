@@ -13,51 +13,45 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 
-/* =====================================
-   🔥 WAIT FOR DOM (CRITICAL FIX)
-===================================== */
 window.addEventListener("DOMContentLoaded", ()=>{
 
+/* ==================================================
+   🔥 SAFE ELEMENT GETTER (ANTI-CRASH)
+================================================== */
+const $ = (id)=>document.getElementById(id);
 
-/* =====================================
-   🔥 IMAGE SLIDER ENGINE
-===================================== */
 
+/* ==================================================
+   🎞 IMAGE SLIDER
+================================================== */
 const images = [
-  "Ideology1.jpg",
-  "Ideology2.jpg",
-  "Ideology3.jpg",
-  "Ideology4.jpg",
-  "Ideology5.jpg"
+  "Ideology1.jpg","Ideology2.jpg","Ideology3.jpg","Ideology4.jpg","Ideology5.jpg"
 ];
 
 let current = 0;
-
-const img = document.getElementById("pageImage");
-const indicator = document.getElementById("pageIndicator");
-const nextBtn = document.getElementById("nextBtn");
-const prevBtn = document.getElementById("prevBtn");
+const img = $("pageImage");
+const indicator = $("pageIndicator");
+const nextBtn = $("nextBtn");
+const prevBtn = $("prevBtn");
 
 function updatePage(){
+  if(!img) return;
   img.src = images[current];
   indicator.innerText = `Page ${current+1} / ${images.length}`;
-  prevBtn.style.opacity = current === 0 ? "0.4" : "1";
-  nextBtn.style.opacity = current === images.length-1 ? "0.4" : "1";
+  prevBtn.style.opacity = current===0 ? "0.4":"1";
+  nextBtn.style.opacity = current===images.length-1 ? "0.4":"1";
 }
 updatePage();
 
-nextBtn.onclick = ()=>{ if(current < images.length-1){ current++; updatePage(); } };
-prevBtn.onclick = ()=>{ if(current > 0){ current--; updatePage(); } };
+nextBtn.onclick=()=>{ if(current<images.length-1){ current++; updatePage(); }};
+prevBtn.onclick=()=>{ if(current>0){ current--; updatePage(); }};
 
 
-/* =====================================
-   🔐 AUTH + FIRESTORE ONBOARDING (FINAL)
-===================================== */
+/* ==================================================
+   🔐 AUTH + FIRESTORE ONBOARDING
+================================================== */
 
-const nameEl  = document.getElementById("userName");
-const emailEl = document.getElementById("userEmail");
-const photoEl = document.getElementById("userPhoto");
-const popup   = document.getElementById("onboardPopup");
+const popup = $("onboardPopup");
 
 onAuthStateChanged(auth, async (user)=>{
 
@@ -66,43 +60,44 @@ onAuthStateChanged(auth, async (user)=>{
     return;
   }
 
-  /* 👤 Inject user */
-  nameEl.innerText  = user.displayName || "User";
-  emailEl.innerText = user.email || "";
-  photoEl.src = user.photoURL || "https://i.imgur.com/6VBx3io.png";
+  /* Inject profile */
+  $("userName").innerText  = user.displayName || "User";
+  $("userEmail").innerText = user.email || "";
+  $("userPhoto").src = user.photoURL || "https://i.imgur.com/6VBx3io.png";
 
-  /* 🔥 FIRESTORE PROFILE CHECK */
+  /* Check Firestore profile */
   const ref  = doc(db,"lm_ideology_user_data", user.uid);
   const snap = await getDoc(ref);
 
   if(!snap.exists()){
-    popup.style.display = "flex";   // NEW USER
+    popup.style.display="flex";   // NEW USER
   }else{
-    popup.style.display = "none";   // EXISTING USER
+    popup.style.display="none";   // EXISTING USER
   }
 
 });
 
 
-/* =====================================
+/* ==================================================
    💾 SAVE PROFILE → FIRESTORE
-===================================== */
+================================================== */
 
-document.getElementById("saveProfile").onclick = async ()=>{
+$("saveProfile").onclick = async ()=>{
 
   const user = auth.currentUser;
+  if(!user){ alert("Login expired. Refresh page."); return; }
 
   const data = {
-    name: document.getElementById("fullNameInput").value,
-    email: document.getElementById("emailInput").value,
-    whatsapp: document.getElementById("whatsappInput").value,
-    dob: document.getElementById("dobInput").value,
-    tob: document.getElementById("tobInput").value,
-    pob: document.getElementById("pobInput").value,
-    country: document.getElementById("countryInput").value,
-    partnerInterest: document.getElementById("partnerCheck").checked,
-    whatsappConsent: document.getElementById("whatsappConsent").checked,
-    updatesConsent: document.getElementById("updatesConsent").checked,
+    name: $("fullNameInput")?.value || "",
+    email: user.email,
+    whatsapp: $("whatsappInput")?.value || "",
+    dob: $("dobInput")?.value || "",
+    tob: $("tobInput")?.value || "",
+    pob: $("pobInput")?.value || "",
+    country: $("countryInput")?.value || "",
+    partnerInterest: $("partnerCheck")?.checked || false,
+    whatsappConsent: $("whatsappConsent")?.checked || false,
+    updatesConsent: $("updatesConsent")?.checked || false,
     createdAt: serverTimestamp()
   };
 
@@ -112,19 +107,18 @@ document.getElementById("saveProfile").onclick = async ()=>{
   }
 
   await setDoc(doc(db,"lm_ideology_user_data", user.uid), data);
-  popup.style.display="none";
 
+  popup.style.display="none";
+  alert("Profile saved successfully 🚀");
 };
 
 
-/* =====================================
+/* ==================================================
    🚪 LOGOUT
-===================================== */
-
-document.getElementById("logoutBtn").onclick = async ()=>{
+================================================== */
+$("logoutBtn").onclick = async ()=>{
   await signOut(auth);
   window.location.href="/";
 };
 
-
-}); // DOM LOADED END
+});
