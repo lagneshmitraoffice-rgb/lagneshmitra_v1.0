@@ -1,13 +1,13 @@
 // firebase-config.js
 
 import { initializeApp } 
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 
 import { getAuth } 
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
 import { getFirestore } 
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 
 const firebaseConfig = {
@@ -25,5 +25,5 @@ const app = initializeApp(firebaseConfig);
 /* 🔐 AUTH */
 export const auth = getAuth(app);
 
-/* 🧠 FIRESTORE (IMPORTANT) */
+/* 🧠 FIRESTORE */
 export const db = getFirestore(app);
