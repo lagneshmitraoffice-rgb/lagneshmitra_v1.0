@@ -1,16 +1,15 @@
-// Firebase SDK imports
+// firebase-config.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDxefsDzhoQyDv2X339PBEqy2o1q2hYf7U",
   authDomain: "lagneshmitra-98176.firebaseapp.com",
   projectId: "lagneshmitra-98176",
   storageBucket: "lagneshmitra-98176.firebasestorage.app",
   messagingSenderId: "1046880553468",
-  appId: "1:1046880553468:web:1f23caef22f08b84304a79",
-  measurementId: "G-LC3FSBJWJT"
+  appId: "1:1046880553468:web:1f23caef22f08b84304a79"
 };
 
-// Init firebase
+const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
