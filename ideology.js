@@ -1,4 +1,4 @@
-import { auth } from "./firebase-config.js";
+import { auth, db } from "./firebase-config.js";
 
 import {
   onAuthStateChanged,
@@ -6,14 +6,17 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
 
 import {
-  getFirestore,
   doc,
   getDoc,
   setDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-const db = getFirestore();
+
+/* =====================================
+   🔥 WAIT FOR DOM (CRITICAL FIX)
+===================================== */
+window.addEventListener("DOMContentLoaded", ()=>{
 
 
 /* =====================================
@@ -43,52 +46,39 @@ function updatePage(){
 }
 updatePage();
 
-nextBtn.onclick = ()=>{
-  if(current < images.length-1){ current++; updatePage(); }
-};
-prevBtn.onclick = ()=>{
-  if(current > 0){ current--; updatePage(); }
-};
+nextBtn.onclick = ()=>{ if(current < images.length-1){ current++; updatePage(); } };
+prevBtn.onclick = ()=>{ if(current > 0){ current--; updatePage(); } };
 
 
 /* =====================================
-   🔐 AUTH GUARD + USER DATA INJECTION
+   🔐 AUTH + FIRESTORE ONBOARDING (FINAL)
 ===================================== */
 
 const nameEl  = document.getElementById("userName");
 const emailEl = document.getElementById("userEmail");
 const photoEl = document.getElementById("userPhoto");
-
-let currentUser = null;
+const popup   = document.getElementById("onboardPopup");
 
 onAuthStateChanged(auth, async (user)=>{
 
   if(!user){
-    window.location.href = "/";
+    window.location.href="/";
     return;
   }
 
-  currentUser = user;
-
+  /* 👤 Inject user */
   nameEl.innerText  = user.displayName || "User";
   emailEl.innerText = user.email || "";
   photoEl.src = user.photoURL || "https://i.imgur.com/6VBx3io.png";
 
-  /* 🔥 CHECK FIRESTORE PROFILE */
-  const docRef = doc(db,"lm_ideology_user_data", user.uid);
-  const docSnap = await getDoc(docRef);
+  /* 🔥 FIRESTORE PROFILE CHECK */
+  const ref  = doc(db,"lm_ideology_user_data", user.uid);
+  const snap = await getDoc(ref);
 
-  const popup = document.getElementById("onboardPopup");
-
-  if(!docSnap.exists()){
-    popup.style.display = "flex";   // first time user
+  if(!snap.exists()){
+    popup.style.display = "flex";   // NEW USER
   }else{
-    popup.style.display = "none";   // existing user
-
-    // update last login silently
-    await setDoc(docRef,{
-      lastLogin: serverTimestamp()
-    },{merge:true});
+    popup.style.display = "none";   // EXISTING USER
   }
 
 });
@@ -98,77 +88,43 @@ onAuthStateChanged(auth, async (user)=>{
    💾 SAVE PROFILE → FIRESTORE
 ===================================== */
 
-const saveBtn = document.getElementById("saveProfile");
+document.getElementById("saveProfile").onclick = async ()=>{
 
-if(saveBtn){
-  saveBtn.onclick = async ()=>{
+  const user = auth.currentUser;
 
-    const name  = document.getElementById("fullName").value;
-    const dob   = document.getElementById("dob").value;
-    const tob   = document.getElementById("tob").value;
-    const pob   = document.getElementById("pob").value;
-    const country = document.getElementById("country").value;
-    const whatsapp = document.getElementById("whatsapp").value;
-
-    const partnerInterest  = document.getElementById("partnerInterest").checked;
-    const whatsappConsent  = document.getElementById("whatsappConsent").checked;
-    const updatesConsent   = document.getElementById("updatesConsent").checked;
-
-    if(!name || !dob || !tob || !pob || !whatsapp || !country){
-      alert("Please fill all required details");
-      return;
-    }
-
-    try{
-
-      const user = currentUser;
-
-      await setDoc(doc(db,"lm_ideology_user_data", user.uid),{
-
-        lmid: user.uid,
-        name,
-        email: user.email,
-        whatsapp,
-        country,
-        dob,
-        tob,
-        pob,
-
-        partnerInterest,
-        whatsappConsent,
-        updatesConsent,
-
-        photoURL: user.photoURL || "",
-        createdAt: serverTimestamp(),
-        lastLogin: serverTimestamp()
-
-      });
-
-      document.getElementById("onboardPopup").style.display = "none";
-      alert("Profile saved successfully 🚀");
-
-    }catch(err){
-      console.error(err);
-      alert("Error saving profile");
-    }
-
+  const data = {
+    name: document.getElementById("fullNameInput").value,
+    email: document.getElementById("emailInput").value,
+    whatsapp: document.getElementById("whatsappInput").value,
+    dob: document.getElementById("dobInput").value,
+    tob: document.getElementById("tobInput").value,
+    pob: document.getElementById("pobInput").value,
+    country: document.getElementById("countryInput").value,
+    partnerInterest: document.getElementById("partnerCheck").checked,
+    whatsappConsent: document.getElementById("whatsappConsent").checked,
+    updatesConsent: document.getElementById("updatesConsent").checked,
+    createdAt: serverTimestamp()
   };
-}
+
+  if(!data.name || !data.whatsapp || !data.dob || !data.tob || !data.pob){
+    alert("Please fill mandatory fields");
+    return;
+  }
+
+  await setDoc(doc(db,"lm_ideology_user_data", user.uid), data);
+  popup.style.display="none";
+
+};
 
 
 /* =====================================
-   🚪 LOGOUT SYSTEM
+   🚪 LOGOUT
 ===================================== */
 
-const logoutBtn = document.getElementById("logoutBtn");
-
-logoutBtn.onclick = async ()=>{
-  try{
-    await signOut(auth);
-    window.location.href = "/";
-  }
-  catch(err){
-    alert("Logout error");
-    console.error(err);
-  }
+document.getElementById("logoutBtn").onclick = async ()=>{
+  await signOut(auth);
+  window.location.href="/";
 };
+
+
+}); // DOM LOADED END
