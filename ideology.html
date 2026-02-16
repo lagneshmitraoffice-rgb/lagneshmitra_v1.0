@@ -1,14 +1,46 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Ideology</title>
+<meta charset="UTF-8">
+<title>LagneshMitra Ideology</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="stylesheet" href="ideology.css">
 </head>
 
-<body style="text-align:center;margin-top:100px;font-family:Arial">
-<h1>Ideology Page 🔥</h1>
-<p>You are logged in.</p>
+<body>
 
-<script type="module" src="/main.js"></script>
+<!-- 🔥 TOP USER BAR -->
+<header class="topbar">
+
+  <div class="logo">LagneshMitra</div>
+
+  <div class="userBox">
+    <img id="userPhoto">
+    <div>
+      <div id="userName"></div>
+      <div id="userEmail"></div>
+    </div>
+    <button id="logoutBtn">Logout</button>
+  </div>
+
+</header>
+
+
+<!-- 🔥 IDEOLOGY SLIDER -->
+<section class="slider">
+
+  <img id="pageImage" src="Ideology1.jpg">
+
+  <div class="controls">
+    <button id="prevBtn">◀ Previous</button>
+    <span id="pageIndicator"></span>
+    <button id="nextBtn">Next ▶</button>
+  </div>
+
+</section>
+
+<script type="module" src="./ideology.js"></script>
 
 </body>
 </html>
