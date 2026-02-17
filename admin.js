@@ -7,6 +7,8 @@ import {
   addDoc
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
+window.addEventListener("DOMContentLoaded", ()=>{
+
 /* ================= SAFE GETTER ================= */
 const $ = (id)=>{
   const el = document.getElementById(id);
@@ -14,61 +16,70 @@ const $ = (id)=>{
   return el;
 };
 
+const listDiv = $("userList");
+
 let users = [];
 let currentIndex = 0;
 let currentDocId = null;
 let isNewUser = false;
 
-const listDiv = $("userList");
 
 /* ================= LMID GENERATOR ================= */
 function generateLMID(name,count){
   if(!name) name="USER";
-
   name = name.trim().split(" ")[0];
-  let code = name.substring(0,4).toUpperCase();
 
+  let code = name.substring(0,4).toUpperCase();
   while(code.length < 4) code += "X";
 
   let num = String(count+1).padStart(4,"0");
-
   return "LM" + code + num;
 }
 
-/* ================= LOAD USERS ================= */
+
+/* ================= LOAD USERS FROM FIRESTORE ================= */
 async function loadUsers(){
+
+  listDiv.innerHTML = "Loading users...";
+
   try{
     const snap = await getDocs(collection(db,"lm_ideology_user_data"));
 
     users = [];
     snap.forEach(d => users.push({ id:d.id, ...d.data() }));
 
-    renderList();
+    if(users.length === 0){
+      listDiv.innerHTML = "No users yet.";
+      return;
+    }
 
-    if(users.length>0) showUser(0);
+    renderList();
+    showUser(0);
+
   }catch(err){
-    console.error("Load error:",err);
+    console.error("Firestore load error:", err);
+    listDiv.innerHTML = "❌ Firestore permission error";
   }
 }
 
-/* ================= LEFT LIST ================= */
-function renderList(){
-  if(!listDiv) return;
 
-  listDiv.innerHTML="";
+/* ================= RENDER LEFT LIST ================= */
+function renderList(){
+  listDiv.innerHTML = "";
 
   users.forEach((u,i)=>{
     const div = document.createElement("div");
     div.className="userCard";
-    div.innerHTML = `<b>${u.name}</b><br>${u.whatsapp}`;
+    div.innerHTML = `<b>${u.name || "Unnamed"}</b><br>${u.whatsapp || ""}`;
     div.onclick = ()=> showUser(i);
     listDiv.appendChild(div);
   });
 }
 
+
 /* ================= SHOW USER ================= */
 function showUser(index){
-  if(users.length===0) return;
+  if(users.length === 0) return;
 
   isNewUser = false;
   currentIndex = index;
@@ -85,6 +96,7 @@ function showUser(index){
   $("country").value = u.country || "";
 }
 
+
 /* ================= NAVIGATION ================= */
 $("nextBtn").onclick = ()=>{
   if(currentIndex < users.length-1) showUser(currentIndex+1);
@@ -94,7 +106,8 @@ $("prevBtn").onclick = ()=>{
   if(currentIndex > 0) showUser(currentIndex-1);
 };
 
-/* ================= ADD USER ================= */
+
+/* ================= ADD NEW USER ================= */
 $("newUserBtn").onclick = ()=>{
   isNewUser = true;
   currentDocId = null;
@@ -108,6 +121,7 @@ $("newUserBtn").onclick = ()=>{
   $("country").value="";
 };
 
+
 /* ================= AUTO LMID ================= */
 $("name").addEventListener("input", ()=>{
   if(isNewUser){
@@ -115,8 +129,10 @@ $("name").addEventListener("input", ()=>{
   }
 });
 
+
 /* ================= SAVE USER ================= */
 $("saveBtn").onclick = async ()=>{
+
   const data = {
     lmID: $("lmId").value,
     name: $("name").value,
@@ -137,11 +153,15 @@ $("saveBtn").onclick = async ()=>{
     }
 
     loadUsers();
+
   }catch(err){
-    console.error(err);
-    alert("Save error");
+    console.error("Save error:", err);
+    alert("Firestore write error");
   }
 };
 
+
 /* ================= START ================= */
-window.addEventListener("DOMContentLoaded", loadUsers);
+loadUsers();
+
+});
