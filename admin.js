@@ -1,14 +1,11 @@
 import { db } from "./firebase-config.js";
-
 import {
   collection,
   getDocs,
   doc,
-  getDoc,
   updateDoc,
   addDoc
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
-
 
 const $ = (id)=>document.getElementById(id);
 
@@ -16,49 +13,47 @@ let users = [];
 let currentIndex = 0;
 let currentDocId = null;
 
-const listDiv = $("userList");
+const listDiv = $("lmUserList");
 
-
-/* ==================================================
-   🔥 LOAD USERS FROM FIRESTORE
-================================================== */
+/* =====================================
+🔥 LOAD USERS FROM FIRESTORE
+=====================================*/
 async function loadUsers(){
-
   const snap = await getDocs(collection(db,"lm_ideology_user_data"));
 
   users = [];
-  listDiv.innerHTML = "";
+  snap.forEach(d => users.push({ id:d.id, ...d.data() }));
 
-  snap.forEach((d)=>{
-    users.push({id:d.id, ...d.data()});
-  });
+  renderList();
+  showUser(0);
+}
+
+/* =====================================
+🔥 RENDER LEFT USER LIST
+=====================================*/
+function renderList(){
+  listDiv.innerHTML="";
 
   users.forEach((u,i)=>{
     const div = document.createElement("div");
     div.className="userCard";
     div.innerHTML = `<b>${u.name}</b><br>${u.whatsapp}`;
-
-    div.onclick = ()=> loadUserToEditor(i);
-
+    div.onclick = ()=> showUser(i);
     listDiv.appendChild(div);
   });
-
-  if(users.length) loadUserToEditor(0);
 }
 
-loadUsers();
+/* =====================================
+🔥 SHOW USER IN EDITOR
+=====================================*/
+function showUser(index){
+  if(users.length===0) return;
 
-
-/* ==================================================
-   🔥 LOAD USER INTO EDITOR
-================================================== */
-function loadUserToEditor(index){
-
-  const u = users[index];
   currentIndex = index;
+  const u = users[index];
   currentDocId = u.id;
 
-  $("lmId").value = u.id || "";
+  $("lmId").value = u.id;
   $("name").value = u.name || "";
   $("whatsapp").value = u.whatsapp || "";
   $("dob").value = u.dob || "";
@@ -67,30 +62,67 @@ function loadUserToEditor(index){
   $("country").value = u.country || "";
 }
 
-
-/* ==================================================
-   ⬅️➡️ NAV BUTTONS
-================================================== */
-$("prevBtn").onclick = ()=>{
-  if(currentIndex>0) loadUserToEditor(currentIndex-1);
-};
-
+/* =====================================
+🔥 NAV BUTTONS
+=====================================*/
 $("nextBtn").onclick = ()=>{
-  if(currentIndex<users.length-1) loadUserToEditor(currentIndex+1);
+  if(currentIndex < users.length-1){
+    showUser(currentIndex+1);
+  }
 };
 
-
-/* ==================================================
-   💾 SAVE CHANGES (UPDATE USER)
-================================================== */
-$("saveBtn").onclick = async ()=>{
-
-  if(!currentDocId){
-    alert("No user selected");
-    return;
+$("prevBtn").onclick = ()=>{
+  if(currentIndex > 0){
+    showUser(currentIndex-1);
   }
+};
+
+/* =====================================
+🔥 ADD NEW USER
+=====================================*/
+$("addUserBtn").onclick = ()=>{
+  currentDocId = null;
+  $("lmId").value="";
+  $("name").value="";
+  $("whatsapp").value="";
+  $("dob").value="";
+  $("tob").value="";
+  $("pob").value="";
+  $("country").value="";
+};
+
+/* =====================================
+🔥 SAVE USER (ADD OR UPDATE)
+=====================================*/
+$("saveBtn").onclick = async ()=>{
 
   const data = {
     name: $("name").value,
     whatsapp: $("whatsapp").value,
-    dob:
+    dob: $("dob").value,
+    tob: $("tob").value,
+    pob: $("pob").value,
+    country: $("country").value
+  };
+
+  try{
+
+    if(currentDocId){
+      // UPDATE
+      await updateDoc(doc(db,"lm_ideology_user_data",currentDocId),data);
+      alert("User Updated ✅");
+    }else{
+      // ADD NEW
+      await addDoc(collection(db,"lm_ideology_user_data"),data);
+      alert("User Added 🚀");
+    }
+
+    loadUsers();
+
+  }catch(err){
+    alert("Save error");
+    console.error(err);
+  }
+};
+
+loadUsers();
