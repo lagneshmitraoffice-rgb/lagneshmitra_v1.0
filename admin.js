@@ -12,24 +12,47 @@ const $ = (id)=>document.getElementById(id);
 let users = [];
 let currentIndex = 0;
 let currentDocId = null;
+let isNewUser = false;
 
-const listDiv = $("lmUserList");
+const listDiv = $("userList");
+
+
+/* =====================================
+🆔 LM ID GENERATOR
+LM + NAME(4) + NUMBER(4)
+=====================================*/
+function generateLMID(name,count){
+  if(!name) name="USER";
+
+  name = name.trim().split(" ")[0];
+  let code = name.substring(0,4).toUpperCase();
+
+  while(code.length < 4) code += "X";
+
+  let num = String(count+1).padStart(4,"0");
+
+  return "LM" + code + num;
+}
+
 
 /* =====================================
 🔥 LOAD USERS FROM FIRESTORE
 =====================================*/
 async function loadUsers(){
+
   const snap = await getDocs(collection(db,"lm_ideology_user_data"));
 
   users = [];
   snap.forEach(d => users.push({ id:d.id, ...d.data() }));
 
   renderList();
-  showUser(0);
+
+  if(users.length>0) showUser(0);
 }
 
+
 /* =====================================
-🔥 RENDER LEFT USER LIST
+🔥 LEFT USER LIST
 =====================================*/
 function renderList(){
   listDiv.innerHTML="";
@@ -43,17 +66,21 @@ function renderList(){
   });
 }
 
+
 /* =====================================
 🔥 SHOW USER IN EDITOR
 =====================================*/
 function showUser(index){
+
   if(users.length===0) return;
 
+  isNewUser = false;
   currentIndex = index;
+
   const u = users[index];
   currentDocId = u.id;
 
-  $("lmId").value = u.id;
+  $("lmId").value = u.lmID || "";
   $("name").value = u.name || "";
   $("whatsapp").value = u.whatsapp || "";
   $("dob").value = u.dob || "";
@@ -62,8 +89,9 @@ function showUser(index){
   $("country").value = u.country || "";
 }
 
+
 /* =====================================
-🔥 NAV BUTTONS
+⬅➡ NAVIGATION
 =====================================*/
 $("nextBtn").onclick = ()=>{
   if(currentIndex < users.length-1){
@@ -77,11 +105,15 @@ $("prevBtn").onclick = ()=>{
   }
 };
 
+
 /* =====================================
-🔥 ADD NEW USER
+➕ ADD NEW USER
 =====================================*/
-$("addUserBtn").onclick = ()=>{
+$("newUserBtn").onclick = ()=>{
+
+  isNewUser = true;
   currentDocId = null;
+
   $("lmId").value="";
   $("name").value="";
   $("whatsapp").value="";
@@ -91,12 +123,24 @@ $("addUserBtn").onclick = ()=>{
   $("country").value="";
 };
 
+
 /* =====================================
-🔥 SAVE USER (ADD OR UPDATE)
+🧠 AUTO LMID WHEN NAME TYPED
+=====================================*/
+$("name").addEventListener("input", ()=>{
+  if(isNewUser){
+    $("lmId").value = generateLMID($("name").value, users.length);
+  }
+});
+
+
+/* =====================================
+💾 SAVE USER (ADD OR UPDATE)
 =====================================*/
 $("saveBtn").onclick = async ()=>{
 
   const data = {
+    lmID: $("lmId").value,
     name: $("name").value,
     whatsapp: $("whatsapp").value,
     dob: $("dob").value,
@@ -111,6 +155,7 @@ $("saveBtn").onclick = async ()=>{
       // UPDATE
       await updateDoc(doc(db,"lm_ideology_user_data",currentDocId),data);
       alert("User Updated ✅");
+
     }else{
       // ADD NEW
       await addDoc(collection(db,"lm_ideology_user_data"),data);
@@ -124,5 +169,6 @@ $("saveBtn").onclick = async ()=>{
     console.error(err);
   }
 };
+
 
 loadUsers();
