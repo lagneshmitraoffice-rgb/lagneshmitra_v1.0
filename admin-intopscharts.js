@@ -1,89 +1,66 @@
-// admin-intopscharts.js
+console.log("Chart engine loaded 🚀");
 
-const $ = (id)=>document.getElementById(id);
+const $ = id => document.getElementById(id);
 
-const resultBox = $("chartResult");
-const btn = $("generateChartBtn");
+/* ================= BUTTON CLICK ================= */
+$("generateBtn").addEventListener("click", generateChart);
 
-/* ================= ZODIAC ================= */
-const signs = [
-  "Aries","Taurus","Gemini","Cancer","Leo","Virgo",
-  "Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"
-];
+/* ================= CORE ENGINE ================= */
+function generateChart(){
 
-/* ================= BASIC TIME → DEGREE ================= */
-/* Simplified internal astro engine v1 */
-function getLagna(hour){
-  // 24h = 360deg → 1h = 15deg
-  let deg = hour * 15;
-  let signIndex = Math.floor(deg / 30) % 12;
-  return signs[signIndex];
-}
+  const name = $("name").value;
+  const dob  = $("dob").value;
+  const tob  = $("tob").value;
+  const pob  = $("pob").value;
+  const country = $("country").value;
 
-/* ================= PLANET POSITIONS (SIMULATED ENGINE) ================= */
-/* v1 placeholder until ephemeris added */
-function getPlanetPositions(){
-  return {
-    Sun:"Scorpio",
-    Moon:"Aquarius",
-    Mercury:"Scorpio",
-    Venus:"Sagittarius",
-    Mars:"Libra",
-    Jupiter:"Taurus",
-    Saturn:"Virgo",
-    Rahu:"Cancer",
-    Ketu:"Capricorn"
-  };
-}
-
-/* ================= HOUSE MAPPING ================= */
-function mapHouses(lagna){
-  let startIndex = signs.indexOf(lagna);
-  let houses = {};
-  for(let i=0;i<12;i++){
-    houses[`House ${i+1}`] = signs[(startIndex+i)%12];
-  }
-  return houses;
-}
-
-/* ================= INTERPRETATION ================= */
-function generateInterpretation(lagna){
-  return `
-Lagna: ${lagna}
-
-• Strong personality axis activated
-• Life path strongly self-driven
-• Internal karmic engine active
-• This chart ready for deeper analysis modules
-`;
-}
-
-/* ================= GENERATE CHART ================= */
-btn.onclick = ()=>{
-
-  const name = $("nameInput").value;
-  const dob = $("dobInput").value;
-  const tob = $("tobInput").value;
-
-  if(!name || !dob || !tob){
-    alert("Fill all fields");
+  if(!dob || !tob){
+    alert("DOB and TOB required");
     return;
   }
 
-  const hour = parseInt(tob.split(":")[0]);
-
-  const lagna = getLagna(hour);
-  const planets = getPlanetPositions();
-  const houses = mapHouses(lagna);
-  const interpretation = generateInterpretation(lagna);
+  // Simple Lahiri mock planetary generator (starter engine)
+  const planets = generatePlanets();
 
   const chartObject = {
-    Name:name,
-    Lagna:lagna,
-    Planets:planets,
-    Houses:houses,
-    Interpretation:interpretation
+    name,
+    dob,
+    tob,
+    pob,
+    country,
+    ayanamsa: "Lahiri",
+    planets
   };
 
-  resultBox.innerHTML = `<pre>${JSON.stringify(chartObject,null,2)}</pre>`;
-};
+  $("resultBox").textContent =
+      JSON.stringify(chartObject, null, 2);
+}
+
+/* ================= PLANET GENERATOR (TEMP ENGINE) ================= */
+function generatePlanets(){
+
+  const signs = [
+    "Aries","Taurus","Gemini","Cancer","Leo","Virgo",
+    "Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"
+  ];
+
+  function randDeg(){
+    return Math.floor(Math.random()*30);
+  }
+
+  function randSign(){
+    return signs[Math.floor(Math.random()*12)];
+  }
+
+  return {
+    Sun: randSign()+" "+randDeg()+"°",
+    Moon: randSign()+" "+randDeg()+"°",
+    Mercury: randSign()+" "+randDeg()+"°",
+    Venus: randSign()+" "+randDeg()+"°",
+    Mars: randSign()+" "+randDeg()+"°",
+    Jupiter: randSign()+" "+randDeg()+"°",
+    Saturn: randSign()+" "+randDeg()+"°",
+    Rahu: randSign()+" "+randDeg()+"°",
+    Ketu: randSign()+" "+randDeg()+"°"
+  };
+}
