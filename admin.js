@@ -7,7 +7,15 @@ import {
   addDoc
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-const $ = (id)=>document.getElementById(id);
+
+window.addEventListener("DOMContentLoaded", ()=>{
+
+/* ================= SAFE GETTER ================= */
+const $ = (id)=>{
+  const el = document.getElementById(id);
+  if(!el) console.error("Missing element:", id);
+  return el;
+};
 
 let users = [];
 let currentIndex = 0;
@@ -32,30 +40,34 @@ function generateLMIDfromUID(uid){
 
 /* ================= LOAD USERS ================= */
 async function loadUsers(){
+  try{
+    const snap = await getDocs(collection(db,"lm_ideology_user_data"));
 
-  const snap = await getDocs(collection(db,"lm_ideology_user_data"));
+    users = [];
+    snap.forEach(d => users.push({ id:d.id, ...d.data() }));
 
-  users = [];
-  snap.forEach(d => users.push({ id:d.id, ...d.data() }));
+    renderList();
 
-  renderList();
-  if(users.length>0) showUser(0);
+    if(users.length > 0) showUser(0);
+
+  }catch(err){
+    console.error("Firestore load error:", err);
+    alert("Error loading users");
+  }
 }
 
 
 /* ================= LEFT LIST ================= */
 function renderList(){
-
   listDiv.innerHTML="";
 
   users.forEach((u,i)=>{
     const div = document.createElement("div");
     div.className="userCard";
-    div.innerHTML = `<b>${u.name || "No Name"}</b>`;
+    div.innerHTML = `<b>${u.name || "No Name"}</b><br>${u.whatsapp || ""}`;
     div.onclick = ()=> showUser(i);
     listDiv.appendChild(div);
   });
-
 }
 
 
@@ -66,7 +78,7 @@ function showUser(index){
   const u = users[index];
   currentDocId = u.id;
 
-  // 🔥 HERE MAGIC HAPPENS
+  // 🔥 AUTO LMID FLASH FROM UID
   $("lmId").value = generateLMIDfromUID(u.id);
 
   $("name").value = u.name || "";
@@ -111,18 +123,31 @@ $("saveBtn").onclick = async ()=>{
     dob: $("dob").value,
     tob: $("tob").value,
     pob: $("pob").value,
-    country: $("country").value
+    country: $("country").value,
+    lmID: $("lmId").value   // ⭐ now LMID also saved
   };
 
-  if(currentDocId){
-    await updateDoc(doc(db,"lm_ideology_user_data",currentDocId),data);
-    alert("User Updated ✅");
-  }else{
-    await addDoc(collection(db,"lm_ideology_user_data"),data);
-    alert("User Added 🚀");
+  try{
+
+    if(currentDocId){
+      await updateDoc(doc(db,"lm_ideology_user_data",currentDocId),data);
+      alert("User Updated ✅");
+    }else{
+      await addDoc(collection(db,"lm_ideology_user_data"),data);
+      alert("User Added 🚀");
+    }
+
+    loadUsers();
+
+  }catch(err){
+    console.error(err);
+    alert("Save error");
   }
 
-  loadUsers();
 };
 
+
+/* ================= START APP ================= */
 loadUsers();
+
+});
