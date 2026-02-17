@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LM Internal Astro Engine</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="admin-intopscharts.css">
+</head>
+
+<body>
+
+<div class="layout">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar">
+      <h2>LagneshMitra</h2>
+      <ul>
+        <li>LM Users</li>
+        <li class="active">Chart Engine</li>
+      </ul>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="content">
+
+      <h1>Birth Chart Generator (Internal)</h1>
+
+      <div class="formCard">
+
+        <input id="name" placeholder="Full Name">
+
+        <label>Date of Birth</label>
+        <input id="dob" type="date">
+
+        <label>Time of Birth</label>
+        <input id="tob" type="time">
+
+        <input id="pob" placeholder="Place of Birth (City)">
+        <input id="country" placeholder="Country">
+
+        <button id="generateBtn">⚡ Generate Chart</button>
+
+      </div>
+
+      <div class="resultCard">
+        <h2>Generated Chart Object</h2>
+        <pre id="resultBox">No data yet…</pre>
+      </div>
+
+  </main>
+
+</div>
+
+<script src="./admin-intopscharts.js"></script>
+
+</body>
+</html>
