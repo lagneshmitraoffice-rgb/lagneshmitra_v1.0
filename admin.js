@@ -7,28 +7,39 @@ import {
   addDoc
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-window.addEventListener("DOMContentLoaded", ()=>{
+window.addEventListener("DOMContentLoaded", async ()=>{
 
+/* ========= SAFE GETTER ========= */
 const $ = (id)=>document.getElementById(id);
+
+/* ========= DOM ELEMENTS ========= */
+const listDiv   = $("userList");
+const nextBtn   = $("nextBtn");
+const prevBtn   = $("prevBtn");
+const newBtn    = $("newUserBtn");
+const saveBtn   = $("saveBtn");
 
 let users = [];
 let currentIndex = 0;
 let currentDocId = null;
 
-const listDiv = $("userList");
-
-/* ================= LOAD USERS ================= */
+/* ========= LOAD USERS ========= */
 async function loadUsers(){
+  console.log("Loading users from Firestore...");
+
   const snap = await getDocs(collection(db,"lm_ideology_user_data"));
 
   users = [];
   snap.forEach(d => users.push({ id:d.id, ...d.data() }));
 
+  console.log("Users loaded:", users.length);
+
   renderList();
-  if(users.length>0) showUser(0);
+
+  if(users.length > 0) showUser(0);
 }
 
-/* ================= LEFT USER LIST ================= */
+/* ========= RENDER LEFT LIST ========= */
 function renderList(){
   listDiv.innerHTML="";
 
@@ -41,15 +52,13 @@ function renderList(){
   });
 }
 
-/* ================= SHOW USER ================= */
+/* ========= SHOW USER ========= */
 function showUser(index){
-  currentIndex = index;
   const u = users[index];
+  currentIndex = index;
   currentDocId = u.id;
 
-  // 🔥 FIREBASE DOC ID
   $("lmId").value = u.id;
-
   $("name").value = u.name || "";
   $("whatsapp").value = u.whatsapp || "";
   $("dob").value = u.dob || "";
@@ -58,17 +67,17 @@ function showUser(index){
   $("country").value = u.country || "";
 }
 
-/* ================= NAVIGATION ================= */
-$("nextBtn").onclick = ()=>{
+/* ========= NAVIGATION ========= */
+nextBtn.onclick = ()=>{
   if(currentIndex < users.length-1) showUser(currentIndex+1);
 };
 
-$("prevBtn").onclick = ()=>{
+prevBtn.onclick = ()=>{
   if(currentIndex > 0) showUser(currentIndex-1);
 };
 
-/* ================= ADD NEW USER ================= */
-$("newUserBtn").onclick = ()=>{
+/* ========= NEW USER ========= */
+newBtn.onclick = ()=>{
   currentDocId = null;
 
   $("lmId").value="";
@@ -80,10 +89,14 @@ $("newUserBtn").onclick = ()=>{
   $("country").value="";
 };
 
-/* ================= SAVE USER ================= */
-$("saveBtn").onclick = async ()=>{
+/* ========= SAVE USER ========= */
+saveBtn.onclick = async ()=>{
 
   const data = {
     name: $("name").value,
     whatsapp: $("whatsapp").value,
-    dob:
+    dob: $("dob").value,
+    tob: $("tob").value,
+    pob: $("pob").value,
+    country: $("country").value,
+    updatedAt:
