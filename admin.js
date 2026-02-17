@@ -7,7 +7,12 @@ import {
   addDoc
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-const $ = (id)=>document.getElementById(id);
+/* ================= SAFE GETTER ================= */
+const $ = (id)=>{
+  const el = document.getElementById(id);
+  if(!el) console.error("Missing element:", id);
+  return el;
+};
 
 let users = [];
 let currentIndex = 0;
@@ -16,11 +21,7 @@ let isNewUser = false;
 
 const listDiv = $("userList");
 
-
-/* =====================================
-🆔 LM ID GENERATOR
-LM + NAME(4) + NUMBER(4)
-=====================================*/
+/* ================= LMID GENERATOR ================= */
 function generateLMID(name,count){
   if(!name) name="USER";
 
@@ -34,27 +35,26 @@ function generateLMID(name,count){
   return "LM" + code + num;
 }
 
-
-/* =====================================
-🔥 LOAD USERS FROM FIRESTORE
-=====================================*/
+/* ================= LOAD USERS ================= */
 async function loadUsers(){
+  try{
+    const snap = await getDocs(collection(db,"lm_ideology_user_data"));
 
-  const snap = await getDocs(collection(db,"lm_ideology_user_data"));
+    users = [];
+    snap.forEach(d => users.push({ id:d.id, ...d.data() }));
 
-  users = [];
-  snap.forEach(d => users.push({ id:d.id, ...d.data() }));
+    renderList();
 
-  renderList();
-
-  if(users.length>0) showUser(0);
+    if(users.length>0) showUser(0);
+  }catch(err){
+    console.error("Load error:",err);
+  }
 }
 
-
-/* =====================================
-🔥 LEFT USER LIST
-=====================================*/
+/* ================= LEFT LIST ================= */
 function renderList(){
+  if(!listDiv) return;
+
   listDiv.innerHTML="";
 
   users.forEach((u,i)=>{
@@ -66,12 +66,8 @@ function renderList(){
   });
 }
 
-
-/* =====================================
-🔥 SHOW USER IN EDITOR
-=====================================*/
+/* ================= SHOW USER ================= */
 function showUser(index){
-
   if(users.length===0) return;
 
   isNewUser = false;
@@ -89,28 +85,17 @@ function showUser(index){
   $("country").value = u.country || "";
 }
 
-
-/* =====================================
-⬅➡ NAVIGATION
-=====================================*/
+/* ================= NAVIGATION ================= */
 $("nextBtn").onclick = ()=>{
-  if(currentIndex < users.length-1){
-    showUser(currentIndex+1);
-  }
+  if(currentIndex < users.length-1) showUser(currentIndex+1);
 };
 
 $("prevBtn").onclick = ()=>{
-  if(currentIndex > 0){
-    showUser(currentIndex-1);
-  }
+  if(currentIndex > 0) showUser(currentIndex-1);
 };
 
-
-/* =====================================
-➕ ADD NEW USER
-=====================================*/
+/* ================= ADD USER ================= */
 $("newUserBtn").onclick = ()=>{
-
   isNewUser = true;
   currentDocId = null;
 
@@ -123,22 +108,15 @@ $("newUserBtn").onclick = ()=>{
   $("country").value="";
 };
 
-
-/* =====================================
-🧠 AUTO LMID WHEN NAME TYPED
-=====================================*/
+/* ================= AUTO LMID ================= */
 $("name").addEventListener("input", ()=>{
   if(isNewUser){
     $("lmId").value = generateLMID($("name").value, users.length);
   }
 });
 
-
-/* =====================================
-💾 SAVE USER (ADD OR UPDATE)
-=====================================*/
+/* ================= SAVE USER ================= */
 $("saveBtn").onclick = async ()=>{
-
   const data = {
     lmID: $("lmId").value,
     name: $("name").value,
@@ -150,25 +128,20 @@ $("saveBtn").onclick = async ()=>{
   };
 
   try{
-
     if(currentDocId){
-      // UPDATE
       await updateDoc(doc(db,"lm_ideology_user_data",currentDocId),data);
       alert("User Updated ✅");
-
     }else{
-      // ADD NEW
       await addDoc(collection(db,"lm_ideology_user_data"),data);
       alert("User Added 🚀");
     }
 
     loadUsers();
-
   }catch(err){
-    alert("Save error");
     console.error(err);
+    alert("Save error");
   }
 };
 
-
-loadUsers();
+/* ================= START ================= */
+window.addEventListener("DOMContentLoaded", loadUsers);
