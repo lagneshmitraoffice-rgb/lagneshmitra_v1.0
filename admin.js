@@ -92,7 +92,128 @@ $("prevBtn").onclick = ()=>{ if(currentIndex > 0) showUser(currentIndex-1); };
 
 /* ================= ADD USER ================= */
 $("addUserBtn").onclick = ()=>{
+import { db } from "./firebase-config.js";
+import {
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+  addDoc
+} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+
+window.addEventListener("DOMContentLoaded", ()=>{
+
+/* ================= SAFE GETTER ================= */
+const $ = (id)=>document.getElementById(id);
+
+let users = [];
+let currentIndex = 0;
+let currentDocId = null;
+
+const listDiv = $("lmUserList");
+
+
+/* =====================================================
+🔥 LMID GENERATOR (NAME + MOBILE)
+LM + first4letters(name) + first4digits(mobile)
+Example → Abhishek + 97944 → LMABHI9794
+=====================================================*/
+function generateLMID(name,mobile){
+  if(!name) name="USER";
+  if(!mobile) mobile="0000000000";
+
+  let firstName = name.trim().split(" ")[0].toUpperCase();
+  let namePart = firstName.substring(0,4);
+  while(namePart.length < 4) namePart += "X";
+
+  let mobilePart = mobile.substring(0,4);
+  while(mobilePart.length < 4) mobilePart += "0";
+
+  return "LM" + namePart + mobilePart;
+}
+
+
+/* =====================================================
+🔥 AUTO LMID CONTROLLER (SMART GENERATOR)
+=====================================================*/
+function autoGenerateLMID(force=false){
+
+  const name = $("name").value.trim();
+  const mobile = $("whatsapp").value.trim();
+
+  if(!name || !mobile) return;
+
+  // existing LMID overwrite mat karo
+  if($("lmId").value && !force) return;
+
+  $("lmId").value = generateLMID(name,mobile);
+}
+
+
+/* ================= LOAD USERS ================= */
+async function loadUsers(){
+  try{
+    const snap = await getDocs(collection(db,"lm_ideology_user_data"));
+
+    users = [];
+    snap.forEach(d => users.push({ id:d.id, ...d.data() }));
+
+    renderList();
+    if(users.length > 0) showUser(0);
+
+  }catch(err){
+    console.error(err);
+    alert("Error loading users");
+  }
+}
+
+
+/* ================= LEFT USER LIST ================= */
+function renderList(){
+  listDiv.innerHTML="";
+
+  users.forEach((u,i)=>{
+    const div = document.createElement("div");
+    div.className="userCard";
+    div.innerHTML = `<b>${u.name || "No Name"}</b><br>${u.whatsapp || ""}`;
+    div.onclick = ()=> showUser(i);
+    listDiv.appendChild(div);
+  });
+}
+
+
+/* ================= SHOW USER ================= */
+function showUser(index){
+
+  currentIndex = index;
+  const u = users[index];
+  currentDocId = u.id;
+
+  $("name").value = u.name || "";
+  $("whatsapp").value = u.whatsapp || "";
+  $("dob").value = u.dob || "";
+  $("tob").value = u.tob || "";
+  $("pob").value = u.pob || "";
+  $("country").value = u.country || "";
+
+  // ⭐ LMID BEHAVIOUR
+  if(u.lmID){
+    $("lmId").value = u.lmID;
+  }else{
+    autoGenerateLMID(true);
+  }
+}
+
+
+/* ================= NAVIGATION ================= */
+$("nextBtn").onclick = ()=>{ if(currentIndex < users.length-1) showUser(currentIndex+1); };
+$("prevBtn").onclick = ()=>{ if(currentIndex > 0) showUser(currentIndex-1); };
+
+
+/* ================= ADD USER ================= */
+$("addUserBtn").onclick = ()=>{
   currentDocId = null;
+
   $("lmId").value="";
   $("name").value="";
   $("whatsapp").value="";
@@ -100,20 +221,15 @@ $("addUserBtn").onclick = ()=>{
   $("tob").value="";
   $("pob").value="";
   $("country").value="";
+
+  // 🔥 new user auto LMID
+  setTimeout(()=>autoGenerateLMID(true),100);
 };
 
 
-/* ================= AUTO LMID ================= */
+/* ================= AUTO LMID ON TYPING ================= */
 $("name").addEventListener("input", autoGenerateLMID);
 $("whatsapp").addEventListener("input", autoGenerateLMID);
-
-function autoGenerateLMID(){
-  const name = $("name").value;
-  const mobile = $("whatsapp").value;
-  if(name && mobile){
-    $("lmId").value = generateLMID(name,mobile);
-  }
-}
 
 
 /* ================= SAVE USER ================= */
