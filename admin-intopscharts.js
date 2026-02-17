@@ -15,7 +15,7 @@ function getJulianDay(dob, tob){
   const [year,month,day] = dob.split("-").map(Number);
   let [hour,min] = tob.split(":").map(Number);
 
-  // IST → UTC
+  // ⭐ IST → UTC conversion
   hour -= 5;
   min  -= 30;
   if(min < 0){ min += 60; hour -= 1; }
@@ -83,7 +83,7 @@ function getSunLongitude(JD){
 
 
 /* ===================================================
-   🌙 HIGH PRECISION MOON LONGITUDE (Extended Meeus)
+   🌙 FINAL MOON LONGITUDE (Meeus + Evection + Variation)
 =================================================== */
 function getMoonLongitude(JD){
 
@@ -101,33 +101,19 @@ function getMoonLongitude(JD){
   Dm = norm360(Dm);
   F  = norm360(F);
 
-  const terms = [
-    [6.288774,  M1],
-    [1.274027,  2*Dm - M1],
-    [0.658314,  2*Dm],
-    [0.213618,  2*M1],
-    [-0.185116, M],
-    [-0.114332, 2*F],
-    [0.058793,  2*(Dm - M1)],
-    [0.057066,  2*Dm - M - M1],
-    [0.053322,  2*Dm + M1],
-    [0.045758,  2*Dm - M],
-    [-0.040923, M - M1],
-    [-0.034720, Dm],
-    [-0.030383, M + M1],
-    [0.015327,  2*(Dm - F)],
-    [-0.012528, 2*F + M1],
-    [0.010980,  2*F - M1],
-    [0.010675,  4*Dm - M1],
-    [0.010034,  3*M1],
-    [0.008548,  4*Dm - 2*M1]
-  ];
+  const Evection = 1.2739 * Math.sin(deg2rad(2*Dm - M1));
+  const AnnualEq = 0.1858 * Math.sin(deg2rad(M));
+  const A3       = 0.37   * Math.sin(deg2rad(M));
 
-  let lon = L0;
+  const M1prime = M1 + Evection - AnnualEq - A3;
 
-  terms.forEach(t=>{
-    lon += t[0] * Math.sin(deg2rad(t[1]));
-  });
+  const Ec = 6.2886 * Math.sin(deg2rad(M1prime));
+  const A4 = 0.214  * Math.sin(deg2rad(2*M1prime));
+
+  let lon = L0 + Evection + Ec - AnnualEq + A4;
+
+  const Variation = 0.6583 * Math.sin(deg2rad(2*(lon - L0)));
+  lon += Variation;
 
   return norm360(lon);
 }
@@ -186,4 +172,4 @@ function generateChart(){
 
   $("resultBox").textContent =
     JSON.stringify(chartObject, null, 2);
-       }
+                               }
