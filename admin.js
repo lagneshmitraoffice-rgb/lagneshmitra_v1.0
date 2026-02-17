@@ -9,31 +9,13 @@ import {
 
 window.addEventListener("DOMContentLoaded", ()=>{
 
-/* ================= SAFE GETTER ================= */
-const $ = (id)=>{
-  const el = document.getElementById(id);
-  if(!el) console.error("Missing element:", id);
-  return el;
-};
+const $ = (id)=>document.getElementById(id);
 
 let users = [];
 let currentIndex = 0;
 let currentDocId = null;
-let isNewUser = false;
 
 const listDiv = $("userList");
-
-/* ================= LMID GENERATOR ================= */
-function generateLMID(name,count){
-  if(!name) name="USER";
-
-  name = name.trim().split(" ")[0];
-  let code = name.substring(0,4).toUpperCase();
-  while(code.length < 4) code += "X";
-
-  let num = String(count+1).padStart(4,"0");
-  return "LM" + code + num;
-}
 
 /* ================= LOAD USERS ================= */
 async function loadUsers(){
@@ -46,13 +28,14 @@ async function loadUsers(){
   if(users.length>0) showUser(0);
 }
 
-/* ================= LEFT LIST ================= */
+/* ================= LEFT USER LIST ================= */
 function renderList(){
   listDiv.innerHTML="";
+
   users.forEach((u,i)=>{
     const div = document.createElement("div");
     div.className="userCard";
-    div.innerHTML = `<b>${u.name}</b><br>${u.whatsapp}`;
+    div.innerHTML = `<b>${u.name || "No Name"}</b><br>${u.whatsapp || ""}`;
     div.onclick = ()=> showUser(i);
     listDiv.appendChild(div);
   });
@@ -60,13 +43,13 @@ function renderList(){
 
 /* ================= SHOW USER ================= */
 function showUser(index){
-  isNewUser = false;
   currentIndex = index;
-
   const u = users[index];
   currentDocId = u.id;
 
-  $("lmId").value = u.lmID || "";
+  // 🔥 FIREBASE DOC ID
+  $("lmId").value = u.id;
+
   $("name").value = u.name || "";
   $("whatsapp").value = u.whatsapp || "";
   $("dob").value = u.dob || "";
@@ -76,17 +59,16 @@ function showUser(index){
 }
 
 /* ================= NAVIGATION ================= */
-$("nextBtn").onclick = ()=> {
+$("nextBtn").onclick = ()=>{
   if(currentIndex < users.length-1) showUser(currentIndex+1);
 };
 
-$("prevBtn").onclick = ()=> {
+$("prevBtn").onclick = ()=>{
   if(currentIndex > 0) showUser(currentIndex-1);
 };
 
-/* ================= ADD USER ================= */
+/* ================= ADD NEW USER ================= */
 $("newUserBtn").onclick = ()=>{
-  isNewUser = true;
   currentDocId = null;
 
   $("lmId").value="";
@@ -98,36 +80,10 @@ $("newUserBtn").onclick = ()=>{
   $("country").value="";
 };
 
-/* ================= AUTO LMID ================= */
-$("name").addEventListener("input", ()=>{
-  if(isNewUser){
-    $("lmId").value = generateLMID($("name").value, users.length);
-  }
-});
-
 /* ================= SAVE USER ================= */
 $("saveBtn").onclick = async ()=>{
+
   const data = {
-    lmID: $("lmId").value,
     name: $("name").value,
     whatsapp: $("whatsapp").value,
-    dob: $("dob").value,
-    tob: $("tob").value,
-    pob: $("pob").value,
-    country: $("country").value
-  };
-
-  if(currentDocId){
-    await updateDoc(doc(db,"lm_ideology_user_data",currentDocId),data);
-    alert("User Updated ✅");
-  }else{
-    await addDoc(collection(db,"lm_ideology_user_data"),data);
-    alert("User Added 🚀");
-  }
-
-  loadUsers();
-};
-
-loadUsers();
-
-});
+    dob:
