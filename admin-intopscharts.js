@@ -14,14 +14,13 @@ async function initSwissEph(){
     swe = new SwissEph();
 
     await swe.initSwissEph({
-        locateFile: (file) => "./astro/" + file
+        locateFile: file => "./astro/" + file
     });
 
     SWE_READY = true;
     console.log("Swiss Ephemeris Ready ✅");
 }
 initSwissEph();
-
 
 document.addEventListener("DOMContentLoaded", () => {
   $("generateBtn").addEventListener("click", generateChart);
@@ -32,10 +31,12 @@ document.addEventListener("DOMContentLoaded", () => {
 📅 JULIAN DAY (IST → UTC)
 =================================================== */
 function getJulianDay(dob, tob){
+
   const [year,month,day] = dob.split("-").map(Number);
   let [hour,min] = tob.split(":").map(Number);
 
-  hour -= 5;  // IST → UTC
+  // IST → UTC
+  hour -= 5;
   min  -= 30;
   if(min < 0){ min += 60; hour -= 1; }
   if(hour < 0){ hour += 24; }
@@ -55,11 +56,11 @@ function getJulianDay(dob, tob){
 
 
 /* ===================================================
-🌌 LAHIRI AYANAMSA (Swiss Exact)
+🌌 LAHIRI AYANAMSA (Swiss Official)
 =================================================== */
 function getAyanamsa(JD){
    swe.set_sid_mode(swe.SE_SIDM_LAHIRI,0,0);
-   return swe.get_ayanamsa(JD);
+   return swe.get_ayanamsa_ut(JD);
 }
 
 
@@ -67,9 +68,9 @@ function getAyanamsa(JD){
 ☀️ REAL SUN (Swiss Ephemeris)
 =================================================== */
 function getRealSun(JD){
-   const flag = swe.SEFLG_SWIEPH;
-   const res = swe.calc_ut(JD, swe.SE_SUN, flag);
-   return res.longitude;
+   const flag = swe.SEFLG_SWIEPH | swe.SEFLG_SPEED;
+   const result = swe.calc_ut(JD, swe.SE_SUN, flag);
+   return result[0]; // longitude
 }
 
 
@@ -77,9 +78,9 @@ function getRealSun(JD){
 🌙 REAL MOON (Swiss Ephemeris)
 =================================================== */
 function getRealMoon(JD){
-   const flag = swe.SEFLG_SWIEPH;
-   const res = swe.calc_ut(JD, swe.SE_MOON, flag);
-   return res.longitude;
+   const flag = swe.SEFLG_SWIEPH | swe.SEFLG_SPEED;
+   const result = swe.calc_ut(JD, swe.SE_MOON, flag);
+   return result[0]; // longitude
 }
 
 
@@ -94,7 +95,7 @@ function degToSign(deg){
 
 
 /* ===================================================
-🔥 MAIN GENERATOR (NASA LEVEL)
+🔥 MAIN GENERATOR — REAL NASA LEVEL
 =================================================== */
 async function generateChart(){
 
@@ -109,11 +110,14 @@ async function generateChart(){
 
   const JD = getJulianDay(dob,tob);
 
+  // 🌌 Ayanamsa
   const ayan = getAyanamsa(JD);
 
+  // ☀️🌙 Tropical positions
   const sunTropical  = getRealSun(JD);
   const moonTropical = getRealMoon(JD);
 
+  // ♓ Convert to Sidereal (Lahiri)
   const sunSid  = norm360(sunTropical  - ayan);
   const moonSid = norm360(moonTropical - ayan);
 
