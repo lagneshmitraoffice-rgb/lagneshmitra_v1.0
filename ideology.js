@@ -4,13 +4,13 @@ import {
   collection,
   addDoc,
   serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
 
 window.addEventListener("DOMContentLoaded", ()=>{
 
 /* ==================================================
-   🔥 SAFE ELEMENT GETTER
+   🔥 SAFE ELEMENT GETTER (NO CRASH)
 ================================================== */
 const $ = (id)=>document.getElementById(id);
 
@@ -33,6 +33,7 @@ const nextBtn = $("nextBtn");
 const prevBtn = $("prevBtn");
 
 function updatePage(){
+  if(!img) return;
   img.src = images[current];
   indicator.innerText = `Page ${current+1} / ${images.length}`;
   prevBtn.style.opacity = current===0 ? "0.4":"1";
@@ -40,58 +41,69 @@ function updatePage(){
 }
 updatePage();
 
-nextBtn.onclick=()=>{ if(current<images.length-1){ current++; updatePage(); }};
-prevBtn.onclick=()=>{ if(current>0){ current--; updatePage(); }};
+nextBtn?.addEventListener("click", ()=>{
+  if(current<images.length-1){ current++; updatePage(); }
+});
+
+prevBtn?.addEventListener("click", ()=>{
+  if(current>0){ current--; updatePage(); }
+});
 
 
 /* ==================================================
-   🚀 SHOW POPUP AFTER 2 SECONDS (FIRST VISIT)
+   🚀 ONBOARD POPUP CONTROL
 ================================================== */
 const popup = $("onboardPopup");
 
+// show popup only once per device
 setTimeout(()=>{
   if(!localStorage.getItem("lm_user_joined")){
     popup.style.display="flex";
   }
-},2000);
+},1500);
 
 
 /* ==================================================
    💾 SAVE USER → FIRESTORE
 ================================================== */
-
 $("saveProfile").onclick = async ()=>{
 
-  const data = {
-    name: $("fullNameInput").value.trim(),
-    whatsapp: $("whatsappInput").value.trim(),
-    dob: $("dobInput").value,
-    tob: $("tobInput").value,
-    pob: $("pobInput").value.trim(),
-    country: $("countryInput").value.trim(),
-    partnerInterest: $("partnerCheck").checked,
-    whatsappConsent: $("whatsappConsent").checked,
-    updatesConsent: $("updatesConsent").checked,
-    createdAt: serverTimestamp()
-  };
+  const name  = $("fullNameInput")?.value.trim();
+  const phone = $("whatsappInput")?.value.trim();
+  const dob   = $("dobInput")?.value;
+  const tob   = $("tobInput")?.value;
+  const pob   = $("pobInput")?.value.trim();
 
-  if(!data.name || !data.whatsapp || !data.dob || !data.tob || !data.pob){
+  if(!name || !phone || !dob || !tob || !pob){
     alert("Please fill mandatory fields");
     return;
   }
 
-  try{
+  const data = {
+    name: name,
+    whatsapp: phone,
+    dob: dob,
+    tob: tob,
+    pob: pob,
+    country: $("countryInput")?.value.trim() || "",
+    partnerInterest: $("partnerCheck")?.checked || false,
+    whatsappConsent: $("whatsappConsent")?.checked || false,
+    updatesConsent: $("updatesConsent")?.checked || false,
+    createdAt: serverTimestamp(),
+    source: "Ideology Page"
+  };
 
+  try{
     await addDoc(collection(db,"lm_ideology_user_data"), data);
 
     localStorage.setItem("lm_user_joined","yes");
     popup.style.display="none";
 
-    alert("Welcome to LagneshMitra 🚀");
+    alert("Profile saved successfully 🚀");
 
   }catch(err){
-    alert("Error saving data");
-    console.error(err);
+    console.error("Firestore Error:", err);
+    alert("Error saving data. Check Firestore rules.");
   }
 
 };
