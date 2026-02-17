@@ -4,14 +4,14 @@ const $ = id => document.getElementById(id);
 $("generateBtn").addEventListener("click", generateChart);
 
 /* ===================================================
-   📅 JULIAN DAY (WITH IST → UTC FIX ⭐)
+   📅 JULIAN DAY (IST → UTC FIXED)
 =================================================== */
 function getJulianDay(dob, tob){
 
   const [year,month,day] = dob.split("-").map(Number);
   let [hour,min] = tob.split(":").map(Number);
 
-  /* ⭐ INDIA TIME → UTC CONVERSION ⭐ */
+  // ⭐ IST → UTC conversion
   hour -= 5;
   min  -= 30;
   if(min < 0){ min += 60; hour -= 1; }
@@ -57,6 +57,7 @@ function degToSign(deg){
    ☀️ SUN LONGITUDE (Astronomy)
 =================================================== */
 function getSunLongitude(JD){
+
   const n = JD - 2451545.0;
 
   let L = 280.460 + 0.9856474 * n;
