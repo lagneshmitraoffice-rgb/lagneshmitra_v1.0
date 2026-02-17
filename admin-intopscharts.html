@@ -11,7 +11,6 @@
 
 <div class="layout">
 
-  <!-- LEFT SIDEBAR -->
   <aside class="sidebar">
       <h2>LagneshMitra</h2>
       <ul>
@@ -20,13 +19,11 @@
       </ul>
   </aside>
 
-  <!-- MAIN CONTENT -->
   <main class="content">
 
       <h1>Birth Chart Generator (Internal)</h1>
 
       <div class="formCard">
-
         <input id="name" placeholder="Full Name">
 
         <label>Date of Birth</label>
@@ -39,24 +36,18 @@
         <input id="country" placeholder="Country">
 
         <button id="generateBtn">⚡ Generate Chart</button>
-
       </div>
 
       <div class="resultCard">
         <h2>Generated Chart Object</h2>
-        <pre id="resultBox">Swiss Ephemeris loading…</pre>
+        <pre id="resultBox">Loading Swiss Ephemeris…</pre>
       </div>
 
   </main>
-
 </div>
 
-
-<!-- ⭐ IMPORTANT -->
-<!-- MODULE MODE REQUIRED FOR SWISSEPH -->
-<script type="module">
-    import "./admin-intopscharts.js";
-</script>
+<!-- ⭐ FINAL CORRECT SCRIPT LOADER -->
+<script type="module" src="./admin-intopscharts.js"></script>
 
 </body>
 </html>
