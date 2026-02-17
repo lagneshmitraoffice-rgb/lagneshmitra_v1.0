@@ -64,7 +64,7 @@ body{
   margin-bottom:30px;
 }
 
-/* CTA BUTTON */
+/* BUTTON */
 .enterBtn{
   background:#FFC107;
   color:black;
@@ -75,6 +75,7 @@ body{
   border-radius:8px;
   cursor:pointer;
   transition:.2s;
+  margin:8px;
 }
 
 .enterBtn:hover{
@@ -86,34 +87,42 @@ body{
 
 <body>
 
-<!-- 🔥 HEADER / MENU BAR -->
 <header class="topbar">
   <div class="logo">LagneshMitra</div>
 
   <nav class="menu">
     <a href="/">Home</a>
     <a href="/ideology.html">Ideology</a>
-    <a href="#">Community</a>
     <a href="/admin.html">Admin</a>
+    <!-- ⭐ NEW INTERNAL TOOL LINK -->
+    <a href="/admin-intopscharts.html">Chart Engine</a>
   </nav>
 </header>
 
-
-<!-- 🔥 HERO SECTION -->
 <section class="hero">
   <h1>Welcome to LagneshMitra</h1>
   <p>Structured Astrology • Real Community • Real Data</p>
 
+  <!-- Ideology -->
   <a href="/ideology.html">
     <button class="enterBtn">Enter Ideology →</button>
   </a>
 
-  <br><br>
+  <br>
 
-  <!-- 🔐 TEMP ADMIN SHORTCUT -->
+  <!-- Admin -->
   <a href="/admin.html">
     <button class="enterBtn" style="background:#444;color:#fff">
       Open Admin Panel →
+    </button>
+  </a>
+
+  <br>
+
+  <!-- 🔥 NEW CHART ENGINE BUTTON -->
+  <a href="/admin-intopscharts.html">
+    <button class="enterBtn" style="background:#00c853;color:#000">
+      ⚡ Open Chart Engine →
     </button>
   </a>
 
