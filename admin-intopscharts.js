@@ -40,7 +40,7 @@ function getJulianDay(dob, tob){
 
 
 /* ===================================================
-   🌍 GREENWICH SIDEREAL TIME (NEW ⭐)
+   🌍 GREENWICH SIDEREAL TIME
 =================================================== */
 function getGST(JD){
 
@@ -53,6 +53,18 @@ function getGST(JD){
     - (T*T*T)/38710000;
 
   return norm360(GST);
+}
+
+
+/* ===================================================
+   📍 LOCAL SIDEREAL TIME (Lucknow)
+=================================================== */
+function getLST(JD, longitude){
+
+  const GST = getGST(JD);
+  const LST = norm360(GST + longitude);
+
+  return LST;
 }
 
 
@@ -158,19 +170,25 @@ function generateChart(){
   }
 
   const JD = getJulianDay(dob, tob);
-  const GST = getGST(JD);        // ⭐ NEW STEP
+  const longitude = 80.946; // Lucknow 🌍
+  const LST = getLST(JD, longitude);
+
   const ayanamsa = getLahiriAyanamsa(JD);
 
   const tropicalSun  = getSunLongitude(JD);
   const tropicalMoon = getMoonLongitude(JD);
 
-  const siderealSun  = norm360(tropicalSun  - ayanamsa);
-  const siderealMoon = norm360(tropicalMoon - ayanamsa);
+  // 🌍 ROTATE SKY TO OBSERVER LOCATION ⭐
+  const rotatedSun  = norm360(tropicalSun  + LST);
+  const rotatedMoon = norm360(tropicalMoon + LST);
+
+  const siderealSun  = norm360(rotatedSun  - ayanamsa);
+  const siderealMoon = norm360(rotatedMoon - ayanamsa);
 
   const chartObject = {
     name,
     JulianDay: JD.toFixed(6),
-    GreenwichSiderealTime: GST.toFixed(4)+"°",
+    LocalSiderealTime: LST.toFixed(4)+"°",
 
     Sun: {
       SiderealDegree: siderealSun.toFixed(4)+"°",
@@ -187,4 +205,4 @@ function generateChart(){
 
   $("resultBox").textContent =
     JSON.stringify(chartObject, null, 2);
-}
+  }
