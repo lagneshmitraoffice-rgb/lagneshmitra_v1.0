@@ -15,7 +15,7 @@ function getJulianDay(dob, tob){
   const [year,month,day] = dob.split("-").map(Number);
   let [hour,min] = tob.split(":").map(Number);
 
-  // IST → UTC
+  // IST → UTC conversion
   hour -= 5;
   min  -= 30;
   if(min < 0){ min += 60; hour -= 1; }
@@ -36,35 +36,6 @@ function getJulianDay(dob, tob){
     + (hour + min/60)/24;
 
   return JD;
-}
-
-
-/* ===================================================
-   🌍 GREENWICH SIDEREAL TIME
-=================================================== */
-function getGST(JD){
-
-  const T = (JD - 2451545.0) / 36525;
-
-  let GST =
-      280.46061837
-    + 360.98564736629 * (JD - 2451545)
-    + 0.000387933*T*T
-    - (T*T*T)/38710000;
-
-  return norm360(GST);
-}
-
-
-/* ===================================================
-   📍 LOCAL SIDEREAL TIME (Lucknow)
-=================================================== */
-function getLST(JD, longitude){
-
-  const GST = getGST(JD);
-  const LST = norm360(GST + longitude);
-
-  return LST;
 }
 
 
@@ -90,7 +61,7 @@ function degToSign(deg){
 
 
 /* ===================================================
-   ☀️ SUN LONGITUDE
+   ☀️ SUN LONGITUDE (Astronomy)
 =================================================== */
 function getSunLongitude(JD){
 
@@ -112,7 +83,7 @@ function getSunLongitude(JD){
 
 
 /* ===================================================
-   🌙 MOON LONGITUDE (Meeus core)
+   🌙 FINAL MOON LONGITUDE (Meeus + Evection + Variation)
 =================================================== */
 function getMoonLongitude(JD){
 
@@ -147,7 +118,7 @@ function getMoonLongitude(JD){
 
 
 /* ===================================================
-   🌌 LAHIRI AYANAMSA
+   🌌 LAHIRI AYANAMSA (Dynamic)
 =================================================== */
 function getLahiriAyanamsa(JD){
   const t = (JD - 2451545.0) / 36525;
@@ -156,7 +127,7 @@ function getLahiriAyanamsa(JD){
 
 
 /* ===================================================
-   🔥 MAIN GENERATOR
+   🔥 MAIN CHART GENERATOR (FINAL)
 =================================================== */
 function generateChart(){
 
@@ -170,25 +141,17 @@ function generateChart(){
   }
 
   const JD = getJulianDay(dob, tob);
-  const longitude = 80.946; // Lucknow 🌍
-  const LST = getLST(JD, longitude);
-
   const ayanamsa = getLahiriAyanamsa(JD);
 
   const tropicalSun  = getSunLongitude(JD);
   const tropicalMoon = getMoonLongitude(JD);
 
-  // 🌍 ROTATE SKY TO OBSERVER LOCATION ⭐
-  const rotatedSun  = norm360(tropicalSun  + LST);
-  const rotatedMoon = norm360(tropicalMoon + LST);
-
-  const siderealSun  = norm360(rotatedSun  - ayanamsa);
-  const siderealMoon = norm360(rotatedMoon - ayanamsa);
+  const siderealSun  = norm360(tropicalSun  - ayanamsa);
+  const siderealMoon = norm360(tropicalMoon - ayanamsa);
 
   const chartObject = {
     name,
     JulianDay: JD.toFixed(6),
-    LocalSiderealTime: LST.toFixed(4)+"°",
 
     Sun: {
       SiderealDegree: siderealSun.toFixed(4)+"°",
@@ -205,4 +168,4 @@ function generateChart(){
 
   $("resultBox").textContent =
     JSON.stringify(chartObject, null, 2);
-  }
+}
