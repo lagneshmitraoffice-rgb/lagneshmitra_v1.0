@@ -15,7 +15,7 @@ function getJulianDay(dob, tob){
   const [year,month,day] = dob.split("-").map(Number);
   let [hour,min] = tob.split(":").map(Number);
 
-  // ⭐ IST → UTC conversion
+  // IST → UTC
   hour -= 5;
   min  -= 30;
   if(min < 0){ min += 60; hour -= 1; }
@@ -36,6 +36,23 @@ function getJulianDay(dob, tob){
     + (hour + min/60)/24;
 
   return JD;
+}
+
+
+/* ===================================================
+   🌍 GREENWICH SIDEREAL TIME (NEW ⭐)
+=================================================== */
+function getGST(JD){
+
+  const T = (JD - 2451545.0) / 36525;
+
+  let GST =
+      280.46061837
+    + 360.98564736629 * (JD - 2451545)
+    + 0.000387933*T*T
+    - (T*T*T)/38710000;
+
+  return norm360(GST);
 }
 
 
@@ -61,7 +78,7 @@ function degToSign(deg){
 
 
 /* ===================================================
-   ☀️ SUN LONGITUDE (Astronomy)
+   ☀️ SUN LONGITUDE
 =================================================== */
 function getSunLongitude(JD){
 
@@ -83,8 +100,7 @@ function getSunLongitude(JD){
 
 
 /* ===================================================
-   🌙 FINAL MOON LONGITUDE
-   Meeus + Evection + Variation (major correction)
+   🌙 MOON LONGITUDE (Meeus core)
 =================================================== */
 function getMoonLongitude(JD){
 
@@ -100,7 +116,6 @@ function getMoonLongitude(JD){
   M1 = norm360(M1);
   Dm = norm360(Dm);
 
-  // ⭐ BIG MOON CORRECTIONS ⭐
   const Evection = 1.2739 * Math.sin(deg2rad(2*Dm - M1));
   const AnnualEq = 0.1858 * Math.sin(deg2rad(M));
   const A3       = 0.37   * Math.sin(deg2rad(M));
@@ -120,7 +135,7 @@ function getMoonLongitude(JD){
 
 
 /* ===================================================
-   🌌 LAHIRI AYANAMSA (Dynamic)
+   🌌 LAHIRI AYANAMSA
 =================================================== */
 function getLahiriAyanamsa(JD){
   const t = (JD - 2451545.0) / 36525;
@@ -129,15 +144,13 @@ function getLahiriAyanamsa(JD){
 
 
 /* ===================================================
-   🔥 MAIN CHART GENERATOR
+   🔥 MAIN GENERATOR
 =================================================== */
 function generateChart(){
 
   const name = $("name").value;
   const dob  = $("dob").value;
   const tob  = $("tob").value;
-  const pob  = $("pob").value;
-  const country = $("country").value;
 
   if(!dob || !tob){
     alert("DOB and TOB required");
@@ -145,6 +158,7 @@ function generateChart(){
   }
 
   const JD = getJulianDay(dob, tob);
+  const GST = getGST(JD);        // ⭐ NEW STEP
   const ayanamsa = getLahiriAyanamsa(JD);
 
   const tropicalSun  = getSunLongitude(JD);
@@ -154,8 +168,9 @@ function generateChart(){
   const siderealMoon = norm360(tropicalMoon - ayanamsa);
 
   const chartObject = {
-    name, dob, tob, pob, country,
+    name,
     JulianDay: JD.toFixed(6),
+    GreenwichSiderealTime: GST.toFixed(4)+"°",
 
     Sun: {
       SiderealDegree: siderealSun.toFixed(4)+"°",
@@ -172,4 +187,4 @@ function generateChart(){
 
   $("resultBox").textContent =
     JSON.stringify(chartObject, null, 2);
-    }
+}
