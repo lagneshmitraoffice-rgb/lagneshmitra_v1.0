@@ -1,22 +1,16 @@
-import { auth, db } from "./firebase-config.js";
+import { db } from "./firebase-config.js";
 
 import {
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-
-import {
-  doc,
-  getDoc,
-  setDoc,
+  collection,
+  addDoc,
   serverTimestamp
-} from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
 window.addEventListener("DOMContentLoaded", ()=>{
 
 /* ==================================================
-   🔥 SAFE ELEMENT GETTER (ANTI-CRASH)
+   🔥 SAFE ELEMENT GETTER
 ================================================== */
 const $ = (id)=>document.getElementById(id);
 
@@ -25,7 +19,11 @@ const $ = (id)=>document.getElementById(id);
    🎞 IMAGE SLIDER
 ================================================== */
 const images = [
-  "Ideology1.jpg","Ideology2.jpg","Ideology3.jpg","Ideology4.jpg","Ideology5.jpg"
+  "Ideology1.jpg",
+  "Ideology2.jpg",
+  "Ideology3.jpg",
+  "Ideology4.jpg",
+  "Ideology5.jpg"
 ];
 
 let current = 0;
@@ -35,7 +33,6 @@ const nextBtn = $("nextBtn");
 const prevBtn = $("prevBtn");
 
 function updatePage(){
-  if(!img) return;
   img.src = images[current];
   indicator.innerText = `Page ${current+1} / ${images.length}`;
   prevBtn.style.opacity = current===0 ? "0.4":"1";
@@ -48,56 +45,33 @@ prevBtn.onclick=()=>{ if(current>0){ current--; updatePage(); }};
 
 
 /* ==================================================
-   🔐 AUTH + FIRESTORE ONBOARDING
+   🚀 SHOW POPUP AFTER 2 SECONDS (FIRST VISIT)
 ================================================== */
-
 const popup = $("onboardPopup");
 
-onAuthStateChanged(auth, async (user)=>{
-
-  if(!user){
-    window.location.href="/";
-    return;
+setTimeout(()=>{
+  if(!localStorage.getItem("lm_user_joined")){
+    popup.style.display="flex";
   }
-
-  /* Inject profile */
-  $("userName").innerText  = user.displayName || "User";
-  $("userEmail").innerText = user.email || "";
-  $("userPhoto").src = user.photoURL || "https://i.imgur.com/6VBx3io.png";
-
-  /* Check Firestore profile */
-  const ref  = doc(db,"lm_ideology_user_data", user.uid);
-  const snap = await getDoc(ref);
-
-  if(!snap.exists()){
-    popup.style.display="flex";   // NEW USER
-  }else{
-    popup.style.display="none";   // EXISTING USER
-  }
-
-});
+},2000);
 
 
 /* ==================================================
-   💾 SAVE PROFILE → FIRESTORE
+   💾 SAVE USER → FIRESTORE
 ================================================== */
 
 $("saveProfile").onclick = async ()=>{
 
-  const user = auth.currentUser;
-  if(!user){ alert("Login expired. Refresh page."); return; }
-
   const data = {
-    name: $("fullNameInput")?.value || "",
-    email: user.email,
-    whatsapp: $("whatsappInput")?.value || "",
-    dob: $("dobInput")?.value || "",
-    tob: $("tobInput")?.value || "",
-    pob: $("pobInput")?.value || "",
-    country: $("countryInput")?.value || "",
-    partnerInterest: $("partnerCheck")?.checked || false,
-    whatsappConsent: $("whatsappConsent")?.checked || false,
-    updatesConsent: $("updatesConsent")?.checked || false,
+    name: $("fullNameInput").value.trim(),
+    whatsapp: $("whatsappInput").value.trim(),
+    dob: $("dobInput").value,
+    tob: $("tobInput").value,
+    pob: $("pobInput").value.trim(),
+    country: $("countryInput").value.trim(),
+    partnerInterest: $("partnerCheck").checked,
+    whatsappConsent: $("whatsappConsent").checked,
+    updatesConsent: $("updatesConsent").checked,
     createdAt: serverTimestamp()
   };
 
@@ -106,19 +80,20 @@ $("saveProfile").onclick = async ()=>{
     return;
   }
 
-  await setDoc(doc(db,"lm_ideology_user_data", user.uid), data);
+  try{
 
-  popup.style.display="none";
-  alert("Profile saved successfully 🚀");
-};
+    await addDoc(collection(db,"lm_ideology_user_data"), data);
 
+    localStorage.setItem("lm_user_joined","yes");
+    popup.style.display="none";
 
-/* ==================================================
-   🚪 LOGOUT
-================================================== */
-$("logoutBtn").onclick = async ()=>{
-  await signOut(auth);
-  window.location.href="/";
+    alert("Welcome to LagneshMitra 🚀");
+
+  }catch(err){
+    alert("Error saving data");
+    console.error(err);
+  }
+
 };
 
 });
