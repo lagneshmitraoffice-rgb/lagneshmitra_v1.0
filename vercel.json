@@ -1,13 +1,1 @@
-{
-  "headers": [
-    {
-      "source": "/astro/(.*)",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "application/wasm"
-        }
-      ]
-    }
-  ]
-}
+{}
