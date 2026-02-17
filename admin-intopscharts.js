@@ -1,9 +1,10 @@
 console.log("REAL VEDIC ASTRO ENGINE LOADED 🚀");
 
 const $ = id => document.getElementById(id);
-$("generateBtn").addEventListener("click", generateChart);
 
-
+document.addEventListener("DOMContentLoaded", () => {
+  $("generateBtn").addEventListener("click", generateChart);
+});
 
 
 /* ===================================================
@@ -14,7 +15,7 @@ function getJulianDay(dob, tob){
   const [year,month,day] = dob.split("-").map(Number);
   let [hour,min] = tob.split(":").map(Number);
 
-  // ⭐ IST → UTC conversion
+  // IST → UTC
   hour -= 5;
   min  -= 30;
   if(min < 0){ min += 60; hour -= 1; }
@@ -38,7 +39,6 @@ function getJulianDay(dob, tob){
 }
 
 
-
 /* ================= HELPERS ================= */
 
 function deg2rad(d){ return d*Math.PI/180; }
@@ -58,7 +58,6 @@ function degToSign(deg){
   const signDegree = deg % 30;
   return `${signs[signIndex]} ${signDegree.toFixed(2)}°`;
 }
-
 
 
 /* ===================================================
@@ -83,10 +82,8 @@ function getSunLongitude(JD){
 }
 
 
-
 /* ===================================================
    🌙 HIGH PRECISION MOON LONGITUDE (Extended Meeus)
-   Accuracy ≈ ±1°
 =================================================== */
 function getMoonLongitude(JD){
 
@@ -105,7 +102,6 @@ function getMoonLongitude(JD){
   F  = norm360(F);
 
   const terms = [
-
     [6.288774,  M1],
     [1.274027,  2*Dm - M1],
     [0.658314,  2*Dm],
@@ -137,7 +133,6 @@ function getMoonLongitude(JD){
 }
 
 
-
 /* ===================================================
    🌌 LAHIRI AYANAMSA (Dynamic)
 =================================================== */
@@ -145,7 +140,6 @@ function getLahiriAyanamsa(JD){
   const t = (JD - 2451545.0) / 36525;
   return 22.460148 + 1.396042*t + 0.000087*t*t;
 }
-
 
 
 /* ===================================================
@@ -174,7 +168,6 @@ function generateChart(){
   const siderealMoon = norm360(tropicalMoon - ayanamsa);
 
   const chartObject = {
-
     name, dob, tob, pob, country,
     JulianDay: JD.toFixed(6),
 
@@ -193,4 +186,4 @@ function generateChart(){
 
   $("resultBox").textContent =
     JSON.stringify(chartObject, null, 2);
-                                }
+       }
