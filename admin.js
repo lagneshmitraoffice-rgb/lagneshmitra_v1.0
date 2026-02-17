@@ -7,7 +7,6 @@ import {
   addDoc
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-
 window.addEventListener("DOMContentLoaded", ()=>{
 
 /* ================= SAFE GETTER ================= */
@@ -21,22 +20,28 @@ let users = [];
 let currentIndex = 0;
 let currentDocId = null;
 
-const listDiv = $("lmUserList");
+const listDiv = $("userList");
 
+/* =====================================================
+🔥 FINAL LMID GENERATOR (NAME + MOBILE)
+LM + first4letters(name) + first4digits(mobile)
+Example → Abhishek + 97944 → LMABHI9794
+=====================================================*/
+function generateLMID(name,mobile){
 
-/* ================= UID → LMID ================= */
-function generateLMIDfromUID(uid){
-  let sum = 0;
-  for(let i=0;i<uid.length;i++){
-    sum += uid.charCodeAt(i);
-  }
+  if(!name) name="USER";
+  if(!mobile) mobile="0000000000";
 
-  let num = String(sum).slice(-6);
-  while(num.length < 6) num = "0"+num;
+  let firstName = name.trim().split(" ")[0].toUpperCase();
+  let namePart = firstName.substring(0,4);
 
-  return "LM" + num;
+  while(namePart.length < 4) namePart += "X";
+
+  let mobilePart = mobile.substring(0,4);
+  while(mobilePart.length < 4) mobilePart += "0";
+
+  return "LM" + namePart + mobilePart;
 }
-
 
 /* ================= LOAD USERS ================= */
 async function loadUsers(){
@@ -56,8 +61,7 @@ async function loadUsers(){
   }
 }
 
-
-/* ================= LEFT LIST ================= */
+/* ================= LEFT USER LIST ================= */
 function renderList(){
   listDiv.innerHTML="";
 
@@ -70,17 +74,14 @@ function renderList(){
   });
 }
 
-
-/* ================= SHOW USER ================= */
+/* ================= SHOW USER IN EDITOR ================= */
 function showUser(index){
 
   currentIndex = index;
   const u = users[index];
   currentDocId = u.id;
 
-  // 🔥 AUTO LMID FLASH FROM UID
-  $("lmId").value = generateLMIDfromUID(u.id);
-
+  $("lmId").value = u.lmID || "";
   $("name").value = u.name || "";
   $("whatsapp").value = u.whatsapp || "";
   $("dob").value = u.dob || "";
@@ -88,7 +89,6 @@ function showUser(index){
   $("pob").value = u.pob || "";
   $("country").value = u.country || "";
 }
-
 
 /* ================= NAVIGATION ================= */
 $("nextBtn").onclick = ()=>{
@@ -98,7 +98,6 @@ $("nextBtn").onclick = ()=>{
 $("prevBtn").onclick = ()=>{
   if(currentIndex > 0) showUser(currentIndex-1);
 };
-
 
 /* ================= ADD USER ================= */
 $("addUserBtn").onclick = ()=>{
@@ -113,18 +112,31 @@ $("addUserBtn").onclick = ()=>{
   $("country").value="";
 };
 
+/* =====================================================
+🔥 AUTO LMID GENERATE WHEN NAME OR MOBILE CHANGES
+=====================================================*/
+$("name").addEventListener("input", autoGenerateLMID);
+$("whatsapp").addEventListener("input", autoGenerateLMID);
+
+function autoGenerateLMID(){
+  const name = $("name").value;
+  const mobile = $("whatsapp").value;
+  if(name && mobile){
+    $("lmId").value = generateLMID(name,mobile);
+  }
+}
 
 /* ================= SAVE USER ================= */
 $("saveBtn").onclick = async ()=>{
 
   const data = {
+    lmID: $("lmId").value,
     name: $("name").value,
     whatsapp: $("whatsapp").value,
     dob: $("dob").value,
     tob: $("tob").value,
     pob: $("pob").value,
-    country: $("country").value,
-    lmID: $("lmId").value   // ⭐ now LMID also saved
+    country: $("country").value
   };
 
   try{
@@ -143,9 +155,58 @@ $("saveBtn").onclick = async ()=>{
     console.error(err);
     alert("Save error");
   }
-
 };
 
+/* =====================================================
+📄 EXPORT PDF
+=====================================================*/
+document.getElementById("pdfBtn").onclick = ()=>{
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.text("LagneshMitra User Report",20,20);
+  let y=40;
+
+  users.forEach(u=>{
+    doc.text(`Name: ${u.name}`,20,y); y+=8;
+    doc.text(`Mobile: ${u.whatsapp}`,20,y); y+=8;
+    doc.text(`LMID: ${u.lmID}`,20,y); y+=12;
+  });
+
+  doc.save("LM_User_Report.pdf");
+};
+
+/* =====================================================
+📊 EXPORT EXCEL
+=====================================================*/
+document.getElementById("excelBtn").onclick = ()=>{
+  const sheet = XLSX.utils.json_to_sheet(users);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, sheet, "Users");
+  XLSX.writeFile(wb,"LM_Users.xlsx");
+};
+
+/* =====================================================
+📝 EXPORT WORD
+=====================================================*/
+document.getElementById("wordBtn").onclick = ()=>{
+  let html = "<h1>LagneshMitra Users</h1>";
+
+  users.forEach(u=>{
+    html += `<p>
+      <b>${u.name}</b><br>
+      Mobile: ${u.whatsapp}<br>
+      LMID: ${u.lmID}<br><br>
+    </p>`;
+  });
+
+  const blob = new Blob(['\ufeff', html], {type:'application/msword'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href=url;
+  a.download="LM_Users.doc";
+  a.click();
+};
 
 /* ================= START APP ================= */
 loadUsers();
