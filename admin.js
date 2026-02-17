@@ -1,78 +1,96 @@
 import { db } from "./firebase-config.js";
+
 import {
   collection,
   getDocs,
   doc,
+  getDoc,
   updateDoc,
   addDoc
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-const listDiv = document.getElementById("userList");
+
+const $ = (id)=>document.getElementById(id);
 
 let users = [];
-let selectedId = null;
+let currentIndex = 0;
+let currentDocId = null;
 
-/* LOAD USERS */
+const listDiv = $("userList");
+
+
+/* ==================================================
+   🔥 LOAD USERS FROM FIRESTORE
+================================================== */
 async function loadUsers(){
+
   const snap = await getDocs(collection(db,"lm_ideology_user_data"));
+
   users = [];
   listDiv.innerHTML = "";
 
-  snap.forEach(docSnap=>{
-    const data = docSnap.data();
-    users.push({id:docSnap.id,...data});
+  snap.forEach((d)=>{
+    users.push({id:d.id, ...d.data()});
+  });
 
+  users.forEach((u,i)=>{
     const div = document.createElement("div");
     div.className="userCard";
-    div.innerHTML = `
-      <b>${data.name}</b><br>
-      ${data.whatsapp}
-    `;
+    div.innerHTML = `<b>${u.name}</b><br>${u.whatsapp}`;
 
-    div.onclick = ()=>loadIntoEditor(docSnap.id,data);
+    div.onclick = ()=> loadUserToEditor(i);
+
     listDiv.appendChild(div);
   });
+
+  if(users.length) loadUserToEditor(0);
 }
 
 loadUsers();
 
-/* LOAD INTO EDITOR */
-function loadIntoEditor(id,data){
-  selectedId=id;
-  lmId.value = data.lmId || "";
-  name.value = data.name || "";
-  whatsapp.value = data.whatsapp || "";
-  dob.value = data.dob || "";
-  tob.value = data.tob || "";
-  pob.value = data.pob || "";
-  country.value = data.country || "";
+
+/* ==================================================
+   🔥 LOAD USER INTO EDITOR
+================================================== */
+function loadUserToEditor(index){
+
+  const u = users[index];
+  currentIndex = index;
+  currentDocId = u.id;
+
+  $("lmId").value = u.id || "";
+  $("name").value = u.name || "";
+  $("whatsapp").value = u.whatsapp || "";
+  $("dob").value = u.dob || "";
+  $("tob").value = u.tob || "";
+  $("pob").value = u.pob || "";
+  $("country").value = u.country || "";
 }
 
-/* SAVE UPDATE */
-saveBtn.onclick = async ()=>{
-  const data = {
-    lmId: lmId.value,
-    name: name.value,
-    whatsapp: whatsapp.value,
-    dob: dob.value,
-    tob: tob.value,
-    pob: pob.value,
-    country: country.value
-  };
 
-  if(selectedId){
-    await updateDoc(doc(db,"lm_ideology_user_data",selectedId),data);
-    alert("User Updated");
-  }else{
-    await addDoc(collection(db,"lm_ideology_user_data"),data);
-    alert("User Added");
+/* ==================================================
+   ⬅️➡️ NAV BUTTONS
+================================================== */
+$("prevBtn").onclick = ()=>{
+  if(currentIndex>0) loadUserToEditor(currentIndex-1);
+};
+
+$("nextBtn").onclick = ()=>{
+  if(currentIndex<users.length-1) loadUserToEditor(currentIndex+1);
+};
+
+
+/* ==================================================
+   💾 SAVE CHANGES (UPDATE USER)
+================================================== */
+$("saveBtn").onclick = async ()=>{
+
+  if(!currentDocId){
+    alert("No user selected");
+    return;
   }
 
-  loadUsers();
-};
-
-/* NEW USER */
-newUserBtn.onclick = ()=>{
-  selectedId=null;
-  document.querySelectorAll(".editor input").forEach(i=>i.value="");
-};
+  const data = {
+    name: $("name").value,
+    whatsapp: $("whatsapp").value,
+    dob:
