@@ -24,22 +24,21 @@
 
       <h1>LM User Database</h1>
 
-      <!-- NAV BUTTONS (IDs MUST MATCH JS) -->
+      <!-- NAV BUTTONS -->
       <div class="navBtns">
         <button id="prevBtn">⬅ Prev</button>
         <button id="nextBtn">Next ➡</button>
         <button id="addUserBtn">➕ Add User</button>
       </div>
 
-      <!-- 🔥 USER LIST (JS TARGET) -->
-      <div id="lmUserList" class="userList"></div>
+      <!-- 🔥 USER LIST -->
+      <div id="userList" class="userList"></div>
 
       <!-- 🔥 USER EDITOR -->
       <div class="editor">
 
         <h2>User Editor</h2>
 
-        <!-- IDs EXACTLY WHAT admin.js EXPECTS -->
         <input id="lmId" placeholder="LM ID">
         <input id="name" placeholder="Name">
         <input id="whatsapp" placeholder="WhatsApp">
@@ -58,7 +57,11 @@
 
 </div>
 
-<script type="module" src="./admin.js"></script>
+<!-- 🔥🔥🔥 FIREBASE PRELOAD FIX (VERY IMPORTANT) -->
+<script type="module">
+  import "./firebase-config.js";
+  import "./admin.js";
+</script>
 
 </body>
 </html>
