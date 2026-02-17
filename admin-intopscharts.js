@@ -1,6 +1,5 @@
 console.log("REAL VEDIC ASTRO ENGINE LOADED 🚀");
 
-// ⭐ BACK TO OFFICIAL RELATIVE PATH
 import SwissEph from "./astro/swisseph.js";
 
 const $ = id => document.getElementById(id);
@@ -9,15 +8,27 @@ let swe = null;
 let SWE_READY = false;
 
 /* ===================================================
-🚀 INIT SWISS EPHEMERIS  (ASTRO FOLDER VERSION)
+🚀 ULTRA FIXED SWISS EPHEMERIS LOADER (VERCEL SAFE)
 =================================================== */
 async function initSwissEph(){
   try{
+
     swe = new SwissEph();
 
-    // ⭐ WASM + DATA LOAD FROM ./astro/
     await swe.initSwissEph({
+
+      // ⭐ ABSOLUTE URL of current site
+      scriptDirectory: window.location.origin + "/astro/",
+
+      // ⭐ WASM FILE LOCATION
+      wasmBinaryFile: "./astro/swisseph.wasm",
+
+      // ⭐ DATA FILE LOCATION
+      dataFile: "./astro/swisseph.data",
+
+      // ⭐ fallback loader
       locateFile: file => "./astro/" + file
+
     });
 
     SWE_READY = true;
@@ -27,7 +38,7 @@ async function initSwissEph(){
   }catch(err){
     console.error("SwissEph FAILED:", err);
     $("resultBox").textContent =
-      "❌ Swiss Ephemeris failed to load.\nCheck ./astro path.";
+      "❌ Swiss Ephemeris failed to load.\nWASM runtime error.";
   }
 }
 initSwissEph();
@@ -38,10 +49,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* ===================================================
-📅 JULIAN DAY (IST → UTC)
+📅 JULIAN DAY
 =================================================== */
 function getJulianDay(dob, tob){
-
   const [year,month,day] = dob.split("-").map(Number);
   let [hour,min] = tob.split(":").map(Number);
 
@@ -64,34 +74,20 @@ function getJulianDay(dob, tob){
 }
 
 
-/* ===================================================
-🌌 LAHIRI AYANAMSA
-=================================================== */
+/* =================================================== */
 function getAyanamsa(JD){
   swe.set_sid_mode(swe.SE_SIDM_LAHIRI,0,0);
   return swe.get_ayanamsa_ut(JD);
 }
 
-
-/* ===================================================
-☀️ REAL SUN
-=================================================== */
 function getRealSun(JD){
-  const res = swe.calc_ut(JD, swe.SE_SUN, swe.SEFLG_SWIEPH);
-  return res.longitude;
+  return swe.calc_ut(JD, swe.SE_SUN, swe.SEFLG_SWIEPH).longitude;
 }
 
-
-/* ===================================================
-🌙 REAL MOON
-=================================================== */
 function getRealMoon(JD){
-  const res = swe.calc_ut(JD, swe.SE_MOON, swe.SEFLG_SWIEPH);
-  return res.longitude;
+  return swe.calc_ut(JD, swe.SE_MOON, swe.SEFLG_SWIEPH).longitude;
 }
 
-
-/* ================= HELPERS ================= */
 function norm360(x){ x%=360; if(x<0)x+=360; return x; }
 
 function degToSign(deg){
@@ -102,7 +98,7 @@ function degToSign(deg){
 
 
 /* ===================================================
-🔥 MAIN GENERATOR
+🔥 GENERATOR
 =================================================== */
 async function generateChart(){
 
