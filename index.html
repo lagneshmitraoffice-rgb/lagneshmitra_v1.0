@@ -1,15 +1,113 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Google Login Test</title>
+<meta charset="UTF-8">
+<title>LagneshMitra</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, Helvetica, sans-serif;
+  background:#000;
+  color:white;
+}
+
+/* 🔥 TOP BAR */
+.topbar{
+  height:70px;
+  background:#0b0b0b;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 20px;
+  border-bottom:1px solid #222;
+}
+
+.logo{
+  color:#FFC107;
+  font-size:24px;
+  font-weight:bold;
+}
+
+/* MENU */
+.menu{
+  display:flex;
+  gap:25px;
+}
+
+.menu a{
+  color:white;
+  text-decoration:none;
+  font-weight:bold;
+  transition:.2s;
+}
+
+.menu a:hover{
+  color:#FFC107;
+}
+
+/* HERO */
+.hero{
+  text-align:center;
+  margin-top:120px;
+}
+
+.hero h1{
+  color:#FFC107;
+  font-size:32px;
+  margin-bottom:10px;
+}
+
+.hero p{
+  color:#aaa;
+  margin-bottom:30px;
+}
+
+/* CTA BUTTON */
+.enterBtn{
+  background:#FFC107;
+  color:black;
+  padding:14px 28px;
+  border:none;
+  font-size:16px;
+  font-weight:bold;
+  border-radius:8px;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.enterBtn:hover{
+  transform:scale(1.05);
+}
+</style>
+
 </head>
 
-<body style="text-align:center;margin-top:120px">
+<body>
 
-  <h1>Google Popup Test Hi Abhishek</h1>
-  <button id="loginBtn">Login with Google</button>
+<!-- 🔥 HEADER / MENU BAR -->
+<header class="topbar">
+  <div class="logo">LagneshMitra</div>
 
-  <script type="module" src="./main.js"></script>
+  <nav class="menu">
+    <a href="/">Home</a>
+    <a href="/ideology.html">Ideology</a>
+    <a href="#">Community</a>
+    <a href="#">Admin</a>
+  </nav>
+</header>
+
+
+<!-- 🔥 HERO SECTION -->
+<section class="hero">
+  <h1>Welcome to LagneshMitra</h1>
+  <p>Structured Astrology • Real Community • Real Data</p>
+
+  <a href="/ideology.html">
+    <button class="enterBtn">Enter Ideology →</button>
+  </a>
+</section>
 
 </body>
 </html>
