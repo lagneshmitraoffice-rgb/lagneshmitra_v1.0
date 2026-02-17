@@ -1,7 +1,7 @@
 console.log("REAL VEDIC ASTRO ENGINE LOADED 🚀");
 
-// ⭐ SWISSEPH FILES IN PUBLIC ROOT
-import SwissEph from "/swisseph.js";
+// ⭐ BACK TO OFFICIAL RELATIVE PATH
+import SwissEph from "./astro/swisseph.js";
 
 const $ = id => document.getElementById(id);
 
@@ -9,16 +9,15 @@ let swe = null;
 let SWE_READY = false;
 
 /* ===================================================
-🚀 INIT SWISS EPHEMERIS (PUBLIC ROOT FINAL)
+🚀 INIT SWISS EPHEMERIS  (ASTRO FOLDER VERSION)
 =================================================== */
 async function initSwissEph(){
   try{
     swe = new SwissEph();
 
-    // ⭐ VERY IMPORTANT
-    // WASM + DATA load from ROOT
+    // ⭐ WASM + DATA LOAD FROM ./astro/
     await swe.initSwissEph({
-      locateFile: file => "/" + file
+      locateFile: file => "./astro/" + file
     });
 
     SWE_READY = true;
@@ -28,7 +27,7 @@ async function initSwissEph(){
   }catch(err){
     console.error("SwissEph FAILED:", err);
     $("resultBox").textContent =
-      "❌ Swiss Ephemeris failed to load.\nCheck root path.";
+      "❌ Swiss Ephemeris failed to load.\nCheck ./astro path.";
   }
 }
 initSwissEph();
@@ -46,7 +45,6 @@ function getJulianDay(dob, tob){
   const [year,month,day] = dob.split("-").map(Number);
   let [hour,min] = tob.split(":").map(Number);
 
-  // IST → UTC
   hour -= 5;
   min  -= 30;
   if(min < 0){ min += 60; hour -= 1; }
@@ -97,10 +95,8 @@ function getRealMoon(JD){
 function norm360(x){ x%=360; if(x<0)x+=360; return x; }
 
 function degToSign(deg){
-  const signs=[
-    "Aries","Taurus","Gemini","Cancer","Leo","Virgo",
-    "Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"
-  ];
+  const signs=["Aries","Taurus","Gemini","Cancer","Leo","Virgo",
+  "Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"];
   return `${signs[Math.floor(deg/30)]} ${(deg%30).toFixed(2)}°`;
 }
 
@@ -131,16 +127,7 @@ async function generateChart(){
   $("resultBox").textContent = JSON.stringify({
     JulianDay: JD.toFixed(6),
     LahiriAyanamsa: ayan.toFixed(6)+"°",
-
-    Sun:{
-      SiderealDegree:sunSid.toFixed(6)+"°",
-      ZodiacPosition:degToSign(sunSid)
-    },
-
-    Moon:{
-      SiderealDegree:moonSid.toFixed(6)+"°",
-      ZodiacPosition:degToSign(moonSid)
-    }
-
+    Sun:{ SiderealDegree:sunSid.toFixed(6)+"°", ZodiacPosition:degToSign(sunSid) },
+    Moon:{ SiderealDegree:moonSid.toFixed(6)+"°", ZodiacPosition:degToSign(moonSid) }
   },null,2);
 }
