@@ -5,6 +5,11 @@
 <title>LM Admin Panel</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="admin.css">
+
+<!-- ⭐ EXPORT LIBRARIES (VERY IMPORTANT) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
 </head>
 
 <body>
@@ -36,7 +41,6 @@
 
       <!-- 🔥 USER EDITOR -->
       <div class="editor">
-
         <h2>User Editor</h2>
 
         <input id="lmId" placeholder="LM ID">
@@ -50,13 +54,11 @@
         <input id="country" placeholder="Country">
 
         <button id="saveBtn">💾 Save Changes</button>
-
       </div>
 
-      <!-- 🔥🔥 EXPORT SECTION -->
+      <!-- 🔥 EXPORT SECTION -->
       <div class="exportArea">
         <h2>Export Reports</h2>
-
         <button id="exportPDF">📄 Export PDF</button>
         <button id="exportExcel">📊 Export Excel</button>
         <button id="exportWord">📝 Export Word</button>
@@ -66,7 +68,7 @@
 
 </div>
 
-<!-- 🔥 Firebase preload -->
+<!-- 🔥 Firebase + Admin JS -->
 <script type="module">
   import "./firebase-config.js";
   import "./admin.js";
