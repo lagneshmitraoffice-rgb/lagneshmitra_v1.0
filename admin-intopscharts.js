@@ -1,6 +1,7 @@
 console.log("REAL VEDIC ASTRO ENGINE LOADED 🚀");
 
-import SwissEph from "./astro/swisseph.js";   // ✅ BACK TO RELATIVE PATH
+// ⭐ FILES NOW IN PUBLIC ROOT
+import SwissEph from "/swisseph.js";
 
 const $ = id => document.getElementById(id);
 
@@ -8,14 +9,15 @@ let swe = null;
 let SWE_READY = false;
 
 /* ===================================================
-🚀 INIT SWISS EPHEMERIS  (FINAL FIX)
+🚀 INIT SWISS EPHEMERIS (ROOT PUBLIC VERSION)
 =================================================== */
 async function initSwissEph(){
   try{
     swe = new SwissEph();
 
+    // ⭐ FILES LOAD FROM PUBLIC ROOT
     await swe.initSwissEph({
-      locateFile: file => "./astro/" + file   // ✅ CRITICAL FIX BACK
+      locateFile: file => "/" + file
     });
 
     SWE_READY = true;
@@ -25,11 +27,10 @@ async function initSwissEph(){
   }catch(err){
     console.error("SwissEph FAILED:", err);
     $("resultBox").textContent =
-      "❌ Swiss Ephemeris failed to load.\nCheck ./astro path.";
+      "❌ Swiss Ephemeris failed to load.\nCheck root path.";
   }
 }
 initSwissEph();
-
 
 document.addEventListener("DOMContentLoaded", () => {
   $("generateBtn").addEventListener("click", generateChart);
@@ -118,7 +119,6 @@ async function generateChart(){
   }
 
   const JD = getJulianDay(dob,tob);
-
   const ayan = getAyanamsa(JD);
 
   const sunSid  = norm360(getRealSun(JD)  - ayan);
