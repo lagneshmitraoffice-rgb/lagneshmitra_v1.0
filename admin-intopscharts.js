@@ -83,7 +83,8 @@ function getSunLongitude(JD){
 
 
 /* ===================================================
-   🌙 FINAL MOON LONGITUDE (Meeus + Evection + Variation)
+   🌙 FINAL MOON LONGITUDE
+   Meeus + Evection + Variation (major correction)
 =================================================== */
 function getMoonLongitude(JD){
 
@@ -93,14 +94,13 @@ function getMoonLongitude(JD){
   let M  = 357.5291092 + 0.98560028 * D;
   let M1 = 134.9633964 + 13.06499295 * D;
   let Dm = 297.8501921 + 12.19074912 * D;
-  let F  = 93.2720950  + 13.22935024 * D;
 
   L0 = norm360(L0);
   M  = norm360(M);
   M1 = norm360(M1);
   Dm = norm360(Dm);
-  F  = norm360(F);
 
+  // ⭐ BIG MOON CORRECTIONS ⭐
   const Evection = 1.2739 * Math.sin(deg2rad(2*Dm - M1));
   const AnnualEq = 0.1858 * Math.sin(deg2rad(M));
   const A3       = 0.37   * Math.sin(deg2rad(M));
@@ -172,4 +172,4 @@ function generateChart(){
 
   $("resultBox").textContent =
     JSON.stringify(chartObject, null, 2);
-                               }
+    }
