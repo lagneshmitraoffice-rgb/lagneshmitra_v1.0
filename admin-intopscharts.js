@@ -1,10 +1,13 @@
-console.log("Real Astro Engine Loaded 🚀");
+console.log("REAL VEDIC ASTRO ENGINE LOADED 🚀");
 
 const $ = id => document.getElementById(id);
 $("generateBtn").addEventListener("click", generateChart);
 
+
+
+
 /* ===================================================
-   📅 JULIAN DAY (IST → UTC FIXED)
+   📅 JULIAN DAY (IST → UTC)
 =================================================== */
 function getJulianDay(dob, tob){
 
@@ -34,7 +37,10 @@ function getJulianDay(dob, tob){
   return JD;
 }
 
+
+
 /* ================= HELPERS ================= */
+
 function deg2rad(d){ return d*Math.PI/180; }
 
 function norm360(x){
@@ -52,6 +58,8 @@ function degToSign(deg){
   const signDegree = deg % 30;
   return `${signs[signIndex]} ${signDegree.toFixed(2)}°`;
 }
+
+
 
 /* ===================================================
    ☀️ SUN LONGITUDE (Astronomy)
@@ -74,36 +82,61 @@ function getSunLongitude(JD){
   return norm360(lambda);
 }
 
+
+
 /* ===================================================
-   🌙 MOON LONGITUDE (Meeus simplified)
+   🌙 HIGH PRECISION MOON LONGITUDE (Extended Meeus)
+   Accuracy ≈ ±1°
 =================================================== */
 function getMoonLongitude(JD){
 
   const D = JD - 2451545.0;
 
-  let L = 218.316 + 13.176396 * D;
-  let D_moon = 297.850 + 12.190749 * D;
-  let M = 357.529 + 0.98560028 * D;
-  let M_moon = 134.963 + 13.064993 * D;
-  let F = 93.272 + 13.229350 * D;
+  let L0 = 218.3164477 + 13.17639648 * D;
+  let M  = 357.5291092 + 0.98560028 * D;
+  let M1 = 134.9633964 + 13.06499295 * D;
+  let Dm = 297.8501921 + 12.19074912 * D;
+  let F  = 93.2720950  + 13.22935024 * D;
 
-  L = norm360(L);
-  D_moon = norm360(D_moon);
-  M = norm360(M);
-  M_moon = norm360(M_moon);
-  F = norm360(F);
+  L0 = norm360(L0);
+  M  = norm360(M);
+  M1 = norm360(M1);
+  Dm = norm360(Dm);
+  F  = norm360(F);
 
-  const lon =
-      L
-    + 6.289 * Math.sin(deg2rad(M_moon))
-    + 1.274 * Math.sin(deg2rad(2*D_moon - M_moon))
-    + 0.658 * Math.sin(deg2rad(2*D_moon))
-    + 0.214 * Math.sin(deg2rad(2*M_moon))
-    - 0.186 * Math.sin(deg2rad(M))
-    - 0.114 * Math.sin(deg2rad(2*F));
+  const terms = [
+
+    [6.288774,  M1],
+    [1.274027,  2*Dm - M1],
+    [0.658314,  2*Dm],
+    [0.213618,  2*M1],
+    [-0.185116, M],
+    [-0.114332, 2*F],
+    [0.058793,  2*(Dm - M1)],
+    [0.057066,  2*Dm - M - M1],
+    [0.053322,  2*Dm + M1],
+    [0.045758,  2*Dm - M],
+    [-0.040923, M - M1],
+    [-0.034720, Dm],
+    [-0.030383, M + M1],
+    [0.015327,  2*(Dm - F)],
+    [-0.012528, 2*F + M1],
+    [0.010980,  2*F - M1],
+    [0.010675,  4*Dm - M1],
+    [0.010034,  3*M1],
+    [0.008548,  4*Dm - 2*M1]
+  ];
+
+  let lon = L0;
+
+  terms.forEach(t=>{
+    lon += t[0] * Math.sin(deg2rad(t[1]));
+  });
 
   return norm360(lon);
 }
+
+
 
 /* ===================================================
    🌌 LAHIRI AYANAMSA (Dynamic)
@@ -112,6 +145,8 @@ function getLahiriAyanamsa(JD){
   const t = (JD - 2451545.0) / 36525;
   return 22.460148 + 1.396042*t + 0.000087*t*t;
 }
+
+
 
 /* ===================================================
    🔥 MAIN CHART GENERATOR
@@ -132,27 +167,24 @@ function generateChart(){
   const JD = getJulianDay(dob, tob);
   const ayanamsa = getLahiriAyanamsa(JD);
 
-  /* ☀️ SUN */
-  const tropicalSun = getSunLongitude(JD);
-  const siderealSun = norm360(tropicalSun - ayanamsa);
-
-  /* 🌙 MOON */
+  const tropicalSun  = getSunLongitude(JD);
   const tropicalMoon = getMoonLongitude(JD);
+
+  const siderealSun  = norm360(tropicalSun  - ayanamsa);
   const siderealMoon = norm360(tropicalMoon - ayanamsa);
 
   const chartObject = {
+
     name, dob, tob, pob, country,
     JulianDay: JD.toFixed(6),
 
     Sun: {
-      TropicalDegree: tropicalSun.toFixed(6)+"°",
-      SiderealDegree: siderealSun.toFixed(6)+"°",
+      SiderealDegree: siderealSun.toFixed(4)+"°",
       ZodiacPosition: degToSign(siderealSun)
     },
 
     Moon: {
-      TropicalDegree: tropicalMoon.toFixed(6)+"°",
-      SiderealDegree: siderealMoon.toFixed(6)+"°",
+      SiderealDegree: siderealMoon.toFixed(4)+"°",
       ZodiacPosition: degToSign(siderealMoon)
     },
 
@@ -161,4 +193,4 @@ function generateChart(){
 
   $("resultBox").textContent =
     JSON.stringify(chartObject, null, 2);
-}
+                                }
