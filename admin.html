@@ -6,9 +6,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="admin.css">
 
-<!-- ⭐ EXPORT LIBRARIES (VERY IMPORTANT) -->
+<!-- 🔥 EXPORT LIBRARIES -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 </head>
 
@@ -16,7 +16,6 @@
 
 <div class="layout">
 
-  <!-- 🔥 LEFT SIDEBAR -->
   <aside class="sidebar">
       <h2>LagneshMitra</h2>
       <ul>
@@ -24,39 +23,32 @@
       </ul>
   </aside>
 
-  <!-- 🔥 MAIN CONTENT -->
   <main class="content">
 
       <h1>LM User Database</h1>
 
-      <!-- NAV BUTTONS -->
       <div class="navBtns">
         <button id="prevBtn">⬅ Prev</button>
         <button id="nextBtn">Next ➡</button>
         <button id="addUserBtn">➕ Add User</button>
       </div>
 
-      <!-- 🔥 USER LIST -->
       <div id="lmUserList" class="userList"></div>
 
-      <!-- 🔥 USER EDITOR -->
       <div class="editor">
         <h2>User Editor</h2>
 
         <input id="lmId" placeholder="LM ID">
         <input id="name" placeholder="Name">
         <input id="whatsapp" placeholder="WhatsApp">
-
         <input id="dob" type="date">
         <input id="tob" type="time">
-
         <input id="pob" placeholder="Place of Birth">
         <input id="country" placeholder="Country">
 
         <button id="saveBtn">💾 Save Changes</button>
       </div>
 
-      <!-- 🔥 EXPORT SECTION -->
       <div class="exportArea">
         <h2>Export Reports</h2>
         <button id="exportPDF">📄 Export PDF</button>
@@ -68,11 +60,8 @@
 
 </div>
 
-<!-- 🔥 Firebase + Admin JS -->
-<script type="module">
-  import "./firebase-config.js";
-  import "./admin.js";
-</script>
+<!-- 🔥 IMPORTANT: load JS as module -->
+<script type="module" src="./admin.js"></script>
 
 </body>
 </html>
