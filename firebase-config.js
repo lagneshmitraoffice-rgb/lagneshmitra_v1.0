@@ -3,9 +3,6 @@
 import { initializeApp } 
 from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
 
-import { getAuth } 
-from "https://www.gstatic.com/firebasejs/12.9.0/firebase-auth.js";
-
 import { getFirestore } 
 from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
@@ -19,11 +16,8 @@ const firebaseConfig = {
   appId: "1:1046880553468:web:1f23caef22f08b84304a79"
 };
 
-/* 🔥 INIT APP */
+/* 🔥 INIT FIREBASE APP */
 const app = initializeApp(firebaseConfig);
 
-/* 🔐 AUTH */
-export const auth = getAuth(app);
-
-/* 🧠 FIRESTORE */
+/* 🧠 FIRESTORE DATABASE */
 export const db = getFirestore(app);
