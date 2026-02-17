@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>LM Admin Panel</title>
@@ -11,7 +11,7 @@
 
 <div class="layout">
 
-  <!-- LEFT MENU -->
+  <!-- 🔥 LEFT SIDEBAR -->
   <aside class="sidebar">
       <h2>LagneshMitra</h2>
       <ul>
@@ -19,31 +19,34 @@
       </ul>
   </aside>
 
-  <!-- MAIN AREA -->
+  <!-- 🔥 MAIN CONTENT -->
   <main class="content">
 
       <h1>LM User Database</h1>
 
-      <!-- NAVIGATION -->
+      <!-- NAV BUTTONS (IDs MUST MATCH JS) -->
       <div class="navBtns">
         <button id="prevBtn">⬅ Prev</button>
         <button id="nextBtn">Next ➡</button>
-        <button id="newUserBtn">➕ Add User</button>
+        <button id="addUserBtn">➕ Add User</button>
       </div>
 
-      <!-- USER LIST -->
-      <div id="userList" class="userList"></div>
+      <!-- 🔥 USER LIST (JS TARGET) -->
+      <div id="lmUserList" class="userList"></div>
 
-      <!-- EDIT PANEL -->
+      <!-- 🔥 USER EDITOR -->
       <div class="editor">
 
         <h2>User Editor</h2>
 
+        <!-- IDs EXACTLY WHAT admin.js EXPECTS -->
         <input id="lmId" placeholder="LM ID">
         <input id="name" placeholder="Name">
         <input id="whatsapp" placeholder="WhatsApp">
+
         <input id="dob" type="date">
         <input id="tob" type="time">
+
         <input id="pob" placeholder="Place of Birth">
         <input id="country" placeholder="Country">
 
