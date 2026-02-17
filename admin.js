@@ -16,19 +16,18 @@ const $ = (id)=>{
   return el;
 };
 
-const listDiv = $("userList");
-
 let users = [];
 let currentIndex = 0;
 let currentDocId = null;
 let isNewUser = false;
 
+const listDiv = $("userList");
 
 /* ================= LMID GENERATOR ================= */
 function generateLMID(name,count){
   if(!name) name="USER";
-  name = name.trim().split(" ")[0];
 
+  name = name.trim().split(" ")[0];
   let code = name.substring(0,4).toUpperCase();
   while(code.length < 4) code += "X";
 
@@ -36,51 +35,31 @@ function generateLMID(name,count){
   return "LM" + code + num;
 }
 
-
-/* ================= LOAD USERS FROM FIRESTORE ================= */
+/* ================= LOAD USERS ================= */
 async function loadUsers(){
+  const snap = await getDocs(collection(db,"lm_ideology_user_data"));
 
-  listDiv.innerHTML = "Loading users...";
+  users = [];
+  snap.forEach(d => users.push({ id:d.id, ...d.data() }));
 
-  try{
-    const snap = await getDocs(collection(db,"lm_ideology_user_data"));
-
-    users = [];
-    snap.forEach(d => users.push({ id:d.id, ...d.data() }));
-
-    if(users.length === 0){
-      listDiv.innerHTML = "No users yet.";
-      return;
-    }
-
-    renderList();
-    showUser(0);
-
-  }catch(err){
-    console.error("Firestore load error:", err);
-    listDiv.innerHTML = "❌ Firestore permission error";
-  }
+  renderList();
+  if(users.length>0) showUser(0);
 }
 
-
-/* ================= RENDER LEFT LIST ================= */
+/* ================= LEFT LIST ================= */
 function renderList(){
-  listDiv.innerHTML = "";
-
+  listDiv.innerHTML="";
   users.forEach((u,i)=>{
     const div = document.createElement("div");
     div.className="userCard";
-    div.innerHTML = `<b>${u.name || "Unnamed"}</b><br>${u.whatsapp || ""}`;
+    div.innerHTML = `<b>${u.name}</b><br>${u.whatsapp}`;
     div.onclick = ()=> showUser(i);
     listDiv.appendChild(div);
   });
 }
 
-
 /* ================= SHOW USER ================= */
 function showUser(index){
-  if(users.length === 0) return;
-
   isNewUser = false;
   currentIndex = index;
 
@@ -96,18 +75,16 @@ function showUser(index){
   $("country").value = u.country || "";
 }
 
-
 /* ================= NAVIGATION ================= */
-$("nextBtn").onclick = ()=>{
+$("nextBtn").onclick = ()=> {
   if(currentIndex < users.length-1) showUser(currentIndex+1);
 };
 
-$("prevBtn").onclick = ()=>{
+$("prevBtn").onclick = ()=> {
   if(currentIndex > 0) showUser(currentIndex-1);
 };
 
-
-/* ================= ADD NEW USER ================= */
+/* ================= ADD USER ================= */
 $("newUserBtn").onclick = ()=>{
   isNewUser = true;
   currentDocId = null;
@@ -121,7 +98,6 @@ $("newUserBtn").onclick = ()=>{
   $("country").value="";
 };
 
-
 /* ================= AUTO LMID ================= */
 $("name").addEventListener("input", ()=>{
   if(isNewUser){
@@ -129,10 +105,8 @@ $("name").addEventListener("input", ()=>{
   }
 });
 
-
 /* ================= SAVE USER ================= */
 $("saveBtn").onclick = async ()=>{
-
   const data = {
     lmID: $("lmId").value,
     name: $("name").value,
@@ -143,25 +117,17 @@ $("saveBtn").onclick = async ()=>{
     country: $("country").value
   };
 
-  try{
-    if(currentDocId){
-      await updateDoc(doc(db,"lm_ideology_user_data",currentDocId),data);
-      alert("User Updated ✅");
-    }else{
-      await addDoc(collection(db,"lm_ideology_user_data"),data);
-      alert("User Added 🚀");
-    }
-
-    loadUsers();
-
-  }catch(err){
-    console.error("Save error:", err);
-    alert("Firestore write error");
+  if(currentDocId){
+    await updateDoc(doc(db,"lm_ideology_user_data",currentDocId),data);
+    alert("User Updated ✅");
+  }else{
+    await addDoc(collection(db,"lm_ideology_user_data"),data);
+    alert("User Added 🚀");
   }
+
+  loadUsers();
 };
 
-
-/* ================= START ================= */
 loadUsers();
 
 });
