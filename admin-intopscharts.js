@@ -1,6 +1,27 @@
 console.log("REAL VEDIC ASTRO ENGINE LOADED 🚀");
 
+import SwissEph from "./astro/swisseph.js";
+
 const $ = id => document.getElementById(id);
+
+let swe = null;
+let SWE_READY = false;
+
+/* ===================================================
+🚀 INIT SWISS EPHEMERIS
+=================================================== */
+async function initSwissEph(){
+    swe = new SwissEph();
+
+    await swe.initSwissEph({
+        locateFile: (file) => "./astro/" + file
+    });
+
+    SWE_READY = true;
+    console.log("Swiss Ephemeris Ready ✅");
+}
+initSwissEph();
+
 
 document.addEventListener("DOMContentLoaded", () => {
   $("generateBtn").addEventListener("click", generateChart);
@@ -14,8 +35,7 @@ function getJulianDay(dob, tob){
   const [year,month,day] = dob.split("-").map(Number);
   let [hour,min] = tob.split(":").map(Number);
 
-  // IST → UTC
-  hour -= 5;
+  hour -= 5;  // IST → UTC
   min  -= 30;
   if(min < 0){ min += 60; hour -= 1; }
   if(hour < 0){ hour += 24; }
@@ -34,8 +54,36 @@ function getJulianDay(dob, tob){
 }
 
 
+/* ===================================================
+🌌 LAHIRI AYANAMSA (Swiss Exact)
+=================================================== */
+function getAyanamsa(JD){
+   swe.set_sid_mode(swe.SE_SIDM_LAHIRI,0,0);
+   return swe.get_ayanamsa(JD);
+}
+
+
+/* ===================================================
+☀️ REAL SUN (Swiss Ephemeris)
+=================================================== */
+function getRealSun(JD){
+   const flag = swe.SEFLG_SWIEPH;
+   const res = swe.calc_ut(JD, swe.SE_SUN, flag);
+   return res.longitude;
+}
+
+
+/* ===================================================
+🌙 REAL MOON (Swiss Ephemeris)
+=================================================== */
+function getRealMoon(JD){
+   const flag = swe.SEFLG_SWIEPH;
+   const res = swe.calc_ut(JD, swe.SE_MOON, flag);
+   return res.longitude;
+}
+
+
 /* ================= HELPERS ================= */
-function deg2rad(d){ return d*Math.PI/180; }
 function norm360(x){ x%=360; if(x<0)x+=360; return x; }
 
 function degToSign(deg){
@@ -46,117 +94,42 @@ function degToSign(deg){
 
 
 /* ===================================================
-🌌 LAHIRI AYANAMSA
+🔥 MAIN GENERATOR (NASA LEVEL)
 =================================================== */
-function getLahiriAyanamsa(JD){
-  const t = (JD - 2451545.0)/36525;
-  return 22.460148 + 1.396042*t + 0.000087*t*t;
-}
+async function generateChart(){
 
-
-/* ===================================================
-🌍 ⭐ NUTATION (MISSING PIECE)
-=================================================== */
-function getNutationLongitude(JD){
-
-  const T = (JD - 2451545.0)/36525;
-
-  const L  = 280.4665 + 36000.7698*T;
-  const L1 = 218.3165 + 481267.8813*T;
-  const O  = 125.04452 - 1934.136261*T;
-
-  const dPsi =
-      -17.20*Math.sin(deg2rad(O))
-      - 1.32*Math.sin(deg2rad(2*L))
-      - 0.23*Math.sin(deg2rad(2*L1))
-      + 0.21*Math.sin(deg2rad(2*O));
-
-  return dPsi/3600; // arcsec → degrees
-}
-
-
-/* ===================================================
-☀️ SUN LONGITUDE
-=================================================== */
-function getSunLongitude(JD){
-  const n = JD - 2451545.0;
-  let L = 280.460 + 0.9856474*n;
-  let g = 357.528 + 0.9856003*n;
-
-  L = norm360(L); g = norm360(g);
-
-  return norm360(
-    L + 1.915*Math.sin(deg2rad(g))
-      + 0.020*Math.sin(deg2rad(2*g))
-  );
-}
-
-
-/* ===================================================
-🌙 MOON LONGITUDE (Meeus 20-term)
-=================================================== */
-function getMoonLongitude(JD){
-
-  const D = JD - 2451545.0;
-
-  let L0 = 218.3164477 + 13.17639648 * D;
-  let M  = 357.5291092 + 0.98560028 * D;
-  let M1 = 134.9633964 + 13.06499295 * D;
-  let Dm = 297.8501921 + 12.19074912 * D;
-  let F  = 93.2720950  + 13.22935024 * D;
-
-  L0=norm360(L0); M=norm360(M); M1=norm360(M1); Dm=norm360(Dm); F=norm360(F);
-
-  let lon=L0;
-
-  lon+=6.288774*Math.sin(deg2rad(M1));
-  lon+=1.274027*Math.sin(deg2rad(2*Dm-M1));
-  lon+=0.658314*Math.sin(deg2rad(2*Dm));
-  lon+=0.213618*Math.sin(deg2rad(2*M1));
-  lon-=0.185116*Math.sin(deg2rad(M));
-  lon-=0.114332*Math.sin(deg2rad(2*F));
-
-  lon+=0.058793*Math.sin(deg2rad(2*(Dm-M1)));
-  lon+=0.057066*Math.sin(deg2rad(2*Dm-M-M1));
-  lon+=0.053322*Math.sin(deg2rad(2*Dm+M1));
-  lon+=0.045758*Math.sin(deg2rad(2*Dm-M));
-  lon-=0.040923*Math.sin(deg2rad(M-M1));
-  lon-=0.034720*Math.sin(deg2rad(Dm));
-  lon-=0.030383*Math.sin(deg2rad(M+M1));
-  lon+=0.015327*Math.sin(deg2rad(2*(Dm-F)));
-  lon-=0.012528*Math.sin(deg2rad(2*F+M1));
-  lon+=0.010980*Math.sin(deg2rad(2*F-M1));
-  lon+=0.010675*Math.sin(deg2rad(4*Dm-M1));
-  lon+=0.010034*Math.sin(deg2rad(3*M1));
-  lon+=0.008548*Math.sin(deg2rad(4*Dm-2*M1));
-
-  return norm360(lon);
-}
-
-
-/* ===================================================
-🔥 MAIN GENERATOR
-=================================================== */
-function generateChart(){
+  if(!SWE_READY){
+    alert("Swiss Ephemeris loading… wait 2 sec");
+    return;
+  }
 
   const dob=$("dob").value;
   const tob=$("tob").value;
   if(!dob||!tob){alert("DOB & TOB required");return;}
 
-  const JD=getJulianDay(dob,tob);
-  const ayan=getLahiriAyanamsa(JD);
-  const nutation=getNutationLongitude(JD);
+  const JD = getJulianDay(dob,tob);
 
-  const sun  = getSunLongitude(JD)  + nutation;
-  const moon = getMoonLongitude(JD) + nutation;
+  const ayan = getAyanamsa(JD);
 
-  const sidSun  = norm360(sun  - ayan);
-  const sidMoon = norm360(moon - ayan);
+  const sunTropical  = getRealSun(JD);
+  const moonTropical = getRealMoon(JD);
+
+  const sunSid  = norm360(sunTropical  - ayan);
+  const moonSid = norm360(moonTropical - ayan);
 
   $("resultBox").textContent = JSON.stringify({
     JulianDay: JD.toFixed(6),
-    Nutation: nutation.toFixed(6)+"°",
-    Sun:{SiderealDegree:sidSun.toFixed(4)+"°",ZodiacPosition:degToSign(sidSun)},
-    Moon:{SiderealDegree:sidMoon.toFixed(4)+"°",ZodiacPosition:degToSign(sidMoon)}
+    LahiriAyanamsa: ayan.toFixed(6)+"°",
+
+    Sun:{
+      SiderealDegree:sunSid.toFixed(6)+"°",
+      ZodiacPosition:degToSign(sunSid)
+    },
+
+    Moon:{
+      SiderealDegree:moonSid.toFixed(6)+"°",
+      ZodiacPosition:degToSign(moonSid)
+    }
+
   },null,2);
 }
