@@ -44,6 +44,22 @@ function norm360(x){
 }
 
 /* ===================================================
+   ♈ DEGREE → SIGN CONVERTER
+=================================================== */
+function degToSign(deg){
+
+  const signs = [
+    "Aries","Taurus","Gemini","Cancer","Leo","Virgo",
+    "Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"
+  ];
+
+  const signIndex = Math.floor(deg / 30);
+  const signDegree = deg % 30;
+
+  return `${signs[signIndex]} ${signDegree.toFixed(2)}°`;
+}
+
+/* ===================================================
    ☀️ REAL SUN LONGITUDE (Astronomy)
 =================================================== */
 function getSunLongitude(JD){
@@ -65,10 +81,20 @@ function getSunLongitude(JD){
 }
 
 /* ===================================================
-   🌌 LAHIRI AYANAMSA (Approx 2025)
+   🌌 REAL LAHIRI AYANAMSA (DYNAMIC)
+   Lahiri ≈ 22°27' in 1950
+   + 50.29 arcsec/year precession
 =================================================== */
 function getLahiriAyanamsa(JD){
-  return 24.0; // we refine later to dynamic
+
+  const t = (JD - 2451545.0) / 36525;  // centuries from J2000
+
+  const ayan =
+      22.460148
+    + 1.396042*t
+    + 0.000087*t*t;
+
+  return ayan;
 }
 
 /* ===================================================
@@ -89,6 +115,7 @@ function generateChart(){
 
   const JD = getJulianDay(dob, tob);
 
+  /* SUN CALCULATION */
   const tropicalSun = getSunLongitude(JD);
   const ayanamsa = getLahiriAyanamsa(JD);
   const siderealSun = norm360(tropicalSun - ayanamsa);
@@ -103,9 +130,10 @@ function generateChart(){
     JulianDay: JD.toFixed(6),
 
     Sun: {
-      tropical: tropicalSun.toFixed(6) + "°",
-      ayanamsa: ayanamsa + "°",
-      sidereal: siderealSun.toFixed(6) + "°"
+      TropicalDegree: tropicalSun.toFixed(6) + "°",
+      SiderealDegree: siderealSun.toFixed(6) + "°",
+      ZodiacPosition: degToSign(siderealSun),
+      LahiriAyanamsa: ayanamsa.toFixed(6) + "°"
     }
   };
 
