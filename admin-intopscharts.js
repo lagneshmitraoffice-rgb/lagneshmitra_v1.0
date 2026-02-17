@@ -16,19 +16,10 @@ async function initSwissEph(){
     swe = new SwissEph();
 
     await swe.initSwissEph({
-
-      // ⭐ ABSOLUTE URL of current site
       scriptDirectory: window.location.origin + "/astro/",
-
-      // ⭐ WASM FILE LOCATION
       wasmBinaryFile: "./astro/swisseph.wasm",
-
-      // ⭐ DATA FILE LOCATION
       dataFile: "./astro/swisseph.data",
-
-      // ⭐ fallback loader
       locateFile: file => "./astro/" + file
-
     });
 
     SWE_READY = true;
@@ -43,18 +34,16 @@ async function initSwissEph(){
 }
 initSwissEph();
 
-document.addEventListener("DOMContentLoaded", () => {
-  $("generateBtn").addEventListener("click", generateChart);
-});
-
 
 /* ===================================================
-📅 JULIAN DAY
+📅 JULIAN DAY (IST → UTC)
 =================================================== */
 function getJulianDay(dob, tob){
+
   const [year,month,day] = dob.split("-").map(Number);
   let [hour,min] = tob.split(":").map(Number);
 
+  // IST → UTC
   hour -= 5;
   min  -= 30;
   if(min < 0){ min += 60; hour -= 1; }
@@ -74,7 +63,9 @@ function getJulianDay(dob, tob){
 }
 
 
-/* =================================================== */
+/* ===================================================
+🌌 AYANAMSA + PLANETS (SWISS)
+=================================================== */
 function getAyanamsa(JD){
   swe.set_sid_mode(swe.SE_SIDM_LAHIRI,0,0);
   return swe.get_ayanamsa_ut(JD);
@@ -98,23 +89,24 @@ function degToSign(deg){
 
 
 /* ===================================================
-🔥 GENERATOR
+🔥 MAIN GENERATOR
 =================================================== */
 async function generateChart(){
 
   if(!SWE_READY){
-    alert("Swiss Ephemeris loading… wait 2 sec");
+    alert("Swiss Ephemeris still loading… wait 2 sec");
     return;
   }
 
   const dob=$("dob").value;
   const tob=$("tob").value;
+
   if(!dob||!tob){
     alert("DOB & TOB required");
     return;
   }
 
-  const JD = getJulianDay(dob,tob);
+  const JD   = getJulianDay(dob,tob);
   const ayan = getAyanamsa(JD);
 
   const sunSid  = norm360(getRealSun(JD)  - ayan);
@@ -123,7 +115,33 @@ async function generateChart(){
   $("resultBox").textContent = JSON.stringify({
     JulianDay: JD.toFixed(6),
     LahiriAyanamsa: ayan.toFixed(6)+"°",
-    Sun:{ SiderealDegree:sunSid.toFixed(6)+"°", ZodiacPosition:degToSign(sunSid) },
-    Moon:{ SiderealDegree:moonSid.toFixed(6)+"°", ZodiacPosition:degToSign(moonSid) }
+
+    Sun:{
+      SiderealDegree:sunSid.toFixed(6)+"°",
+      ZodiacPosition:degToSign(sunSid)
+    },
+
+    Moon:{
+      SiderealDegree:moonSid.toFixed(6)+"°",
+      ZodiacPosition:degToSign(moonSid)
+    }
+
   },null,2);
 }
+
+
+/* ===================================================
+⭐ FINAL BUTTON CONNECT FIX (CRITICAL)
+=================================================== */
+window.addEventListener("load", () => {
+
+  const btn = document.getElementById("generateBtn");
+
+  if(btn){
+    btn.onclick = generateChart;
+    console.log("Generate button connected ✅");
+  }else{
+    console.error("Generate button NOT FOUND ❌");
+  }
+
+});
