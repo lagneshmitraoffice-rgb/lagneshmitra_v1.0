@@ -4,11 +4,18 @@ const $ = id => document.getElementById(id);
 $("generateBtn").addEventListener("click", generateChart);
 
 /* ===================================================
-   📅 JULIAN DAY CALCULATION (ACCURATE)
+   📅 JULIAN DAY (WITH IST → UTC FIX ⭐)
 =================================================== */
 function getJulianDay(dob, tob){
+
   const [year,month,day] = dob.split("-").map(Number);
-  const [hour,min] = tob.split(":").map(Number);
+  let [hour,min] = tob.split(":").map(Number);
+
+  /* ⭐ INDIA TIME → UTC CONVERSION ⭐ */
+  hour -= 5;
+  min  -= 30;
+  if(min < 0){ min += 60; hour -= 1; }
+  if(hour < 0){ hour += 24; }
 
   let Y = year;
   let M = month;
@@ -27,19 +34,15 @@ function getJulianDay(dob, tob){
   return JD;
 }
 
-/* ================= DEG ↔ RAD ================= */
+/* ================= HELPERS ================= */
 function deg2rad(d){ return d*Math.PI/180; }
 
-/* ================= NORMALIZE 0-360 ================= */
 function norm360(x){
   x = x % 360;
   if(x < 0) x += 360;
   return x;
 }
 
-/* ===================================================
-   ♈ DEGREE → SIGN CONVERTER
-=================================================== */
 function degToSign(deg){
   const signs = [
     "Aries","Taurus","Gemini","Cancer","Leo","Virgo",
@@ -55,8 +58,10 @@ function degToSign(deg){
 =================================================== */
 function getSunLongitude(JD){
   const n = JD - 2451545.0;
+
   let L = 280.460 + 0.9856474 * n;
   let g = 357.528 + 0.9856003 * n;
+
   L = norm360(L);
   g = norm360(g);
 
@@ -126,11 +131,11 @@ function generateChart(){
   const JD = getJulianDay(dob, tob);
   const ayanamsa = getLahiriAyanamsa(JD);
 
-  /* SUN */
+  /* ☀️ SUN */
   const tropicalSun = getSunLongitude(JD);
   const siderealSun = norm360(tropicalSun - ayanamsa);
 
-  /* MOON */
+  /* 🌙 MOON */
   const tropicalMoon = getMoonLongitude(JD);
   const siderealMoon = norm360(tropicalMoon - ayanamsa);
 
@@ -153,5 +158,6 @@ function generateChart(){
     LahiriAyanamsa: ayanamsa.toFixed(6)+"°"
   };
 
-  $("resultBox").textContent = JSON.stringify(chartObject, null, 2);
+  $("resultBox").textContent =
+    JSON.stringify(chartObject, null, 2);
 }
