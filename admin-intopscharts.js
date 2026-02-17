@@ -8,14 +8,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 /* ===================================================
-   📅 JULIAN DAY (IST → UTC)
+📅 JULIAN DAY (IST → UTC)
 =================================================== */
 function getJulianDay(dob, tob){
 
   const [year,month,day] = dob.split("-").map(Number);
   let [hour,min] = tob.split(":").map(Number);
 
-  // IST → UTC conversion
+  // ⭐ IST → UTC conversion
   hour -= 5;
   min  -= 30;
   if(min < 0){ min += 60; hour -= 1; }
@@ -61,7 +61,7 @@ function degToSign(deg){
 
 
 /* ===================================================
-   ☀️ SUN LONGITUDE (Astronomy)
+☀️ SUN LONGITUDE (Astronomy)
 =================================================== */
 function getSunLongitude(JD){
 
@@ -83,8 +83,8 @@ function getSunLongitude(JD){
 
 
 /* ===================================================
-   🌙 HIGH PRECISION MOON LONGITUDE (Phase-1)
-   Accuracy ≈ ±0.3°
+🌙 HIGH PRECISION MOON LONGITUDE (20-term Meeus)
+Accuracy ≈ ±0.3°
 =================================================== */
 function getMoonLongitude(JD){
 
@@ -130,7 +130,7 @@ function getMoonLongitude(JD){
 
 
 /* ===================================================
-   🌌 LAHIRI AYANAMSA
+🌌 LAHIRI AYANAMSA (Dynamic)
 =================================================== */
 function getLahiriAyanamsa(JD){
   const t = (JD - 2451545.0) / 36525;
@@ -139,7 +139,7 @@ function getLahiriAyanamsa(JD){
 
 
 /* ===================================================
-   🔥 MAIN CHART GENERATOR
+🔥 MAIN CHART GENERATOR
 =================================================== */
 function generateChart(){
 
@@ -182,4 +182,4 @@ function generateChart(){
 
   $("resultBox").textContent =
     JSON.stringify(chartObject, null, 2);
-    }
+}
