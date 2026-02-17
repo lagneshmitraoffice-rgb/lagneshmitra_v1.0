@@ -1,38 +1,22 @@
-import { auth } from "./firebase-config.js";
-import {
-  GoogleAuthProvider,
-  signInWithPopup,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+console.log("MAIN ENGINE START 🚀");
 
-console.log("MAIN JS LOADED");
+import { isUserJoined, openJoinPopup } from "./auth.js";
 
-const provider = new GoogleAuthProvider();
-
+/* =========================================
+   WAIT FOR PAGE LOAD
+========================================= */
 window.addEventListener("DOMContentLoaded", () => {
 
-  const btn = document.getElementById("loginBtn"); // ⭐ correct ID
+  console.log("DOM READY");
 
-  if (!btn) {
-    alert("Button not found → JS connected but ID mismatch");
-    return;
+  // Check local session
+  const joined = isUserJoined();
+
+  if (!joined) {
+    console.log("New visitor → opening join popup");
+    openJoinPopup();
+  } else {
+    console.log("Returning user");
   }
 
-  alert("JS Connected Successfully 🚀");
-
-  btn.addEventListener("click", async () => {
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (err) {
-      alert(err.message);
-    }
-  });
-
-});
-
-// redirect after login
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    window.location.href = "/ideology.html";
-  }
 });
