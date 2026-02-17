@@ -1,6 +1,6 @@
 console.log("REAL VEDIC ASTRO ENGINE LOADED 🚀");
 
-import SwissEph from "./astro/swisseph.js";
+import SwissEph from "/astro/swisseph.js";
 
 const $ = id => document.getElementById(id);
 
@@ -8,19 +8,28 @@ let swe = null;
 let SWE_READY = false;
 
 /* ===================================================
-🚀 INIT SWISS EPHEMERIS
+🚀 INIT SWISS EPHEMERIS (FIXED FOR VERCEL)
 =================================================== */
 async function initSwissEph(){
+  try{
     swe = new SwissEph();
 
     await swe.initSwissEph({
-        locateFile: file => "./astro/" + file
+      locateFile: file => "/astro/" + file   // ⭐ CRITICAL FIX
     });
 
     SWE_READY = true;
     console.log("Swiss Ephemeris Ready ✅");
+    $("resultBox").textContent = "Swiss Ephemeris Ready ✅";
+
+  }catch(err){
+    console.error("SwissEph FAILED:", err);
+    $("resultBox").textContent =
+      "❌ Swiss Ephemeris failed to load.\nCheck /astro path.";
+  }
 }
 initSwissEph();
+
 
 document.addEventListener("DOMContentLoaded", () => {
   $("generateBtn").addEventListener("click", generateChart);
@@ -59,8 +68,8 @@ function getJulianDay(dob, tob){
 🌌 LAHIRI AYANAMSA (Swiss Official)
 =================================================== */
 function getAyanamsa(JD){
-   swe.set_sid_mode(swe.SE_SIDM_LAHIRI,0,0);
-   return swe.get_ayanamsa_ut(JD);
+  swe.set_sid_mode(swe.SE_SIDM_LAHIRI,0,0);
+  return swe.get_ayanamsa_ut(JD);
 }
 
 
@@ -68,9 +77,9 @@ function getAyanamsa(JD){
 ☀️ REAL SUN (Swiss Ephemeris)
 =================================================== */
 function getRealSun(JD){
-   const flag = swe.SEFLG_SWIEPH | swe.SEFLG_SPEED;
-   const result = swe.calc_ut(JD, swe.SE_SUN, flag);
-   return result[0]; // longitude
+  const flag = swe.SEFLG_SWIEPH;
+  const res = swe.calc_ut(JD, swe.SE_SUN, flag);
+  return res.longitude;   // ⭐ correct WASM return
 }
 
 
@@ -78,9 +87,9 @@ function getRealSun(JD){
 🌙 REAL MOON (Swiss Ephemeris)
 =================================================== */
 function getRealMoon(JD){
-   const flag = swe.SEFLG_SWIEPH | swe.SEFLG_SPEED;
-   const result = swe.calc_ut(JD, swe.SE_MOON, flag);
-   return result[0]; // longitude
+  const flag = swe.SEFLG_SWIEPH;
+  const res = swe.calc_ut(JD, swe.SE_MOON, flag);
+  return res.longitude;   // ⭐ correct WASM return
 }
 
 
@@ -95,7 +104,7 @@ function degToSign(deg){
 
 
 /* ===================================================
-🔥 MAIN GENERATOR — REAL NASA LEVEL
+🔥 MAIN GENERATOR — FINAL
 =================================================== */
 async function generateChart(){
 
@@ -106,18 +115,18 @@ async function generateChart(){
 
   const dob=$("dob").value;
   const tob=$("tob").value;
-  if(!dob||!tob){alert("DOB & TOB required");return;}
+  if(!dob||!tob){
+    alert("DOB & TOB required");
+    return;
+  }
 
   const JD = getJulianDay(dob,tob);
 
-  // 🌌 Ayanamsa
   const ayan = getAyanamsa(JD);
 
-  // ☀️🌙 Tropical positions
   const sunTropical  = getRealSun(JD);
   const moonTropical = getRealMoon(JD);
 
-  // ♓ Convert to Sidereal (Lahiri)
   const sunSid  = norm360(sunTropical  - ayan);
   const moonSid = norm360(moonTropical - ayan);
 
