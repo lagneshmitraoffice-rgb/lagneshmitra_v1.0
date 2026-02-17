@@ -2,13 +2,20 @@ console.log("REAL VEDIC ASTRO ENGINE LOADED 🚀");
 
 import SwissEph from "./astro/swisseph.js";
 
+/* 🔥🔥🔥 CRITICAL FIX — FORCE BROWSER MODE (EMSCRIPTEN BUG FIX) */
+window.process = undefined;
+window.require = undefined;
+window.module  = undefined;
+window.exports = undefined;
+/* 🔥🔥🔥 */
+
 const $ = id => document.getElementById(id);
 
 let swe = null;
 let SWE_READY = false;
 
 /* ===================================================
-🚀 ULTRA FIXED SWISS EPHEMERIS LOADER (VERCEL SAFE)
+🚀 SWISS EPHEMERIS LOADER (FINAL)
 =================================================== */
 async function initSwissEph(){
   try{
@@ -43,7 +50,6 @@ function getJulianDay(dob, tob){
   const [year,month,day] = dob.split("-").map(Number);
   let [hour,min] = tob.split(":").map(Number);
 
-  // IST → UTC
   hour -= 5;
   min  -= 30;
   if(min < 0){ min += 60; hour -= 1; }
@@ -64,7 +70,7 @@ function getJulianDay(dob, tob){
 
 
 /* ===================================================
-🌌 AYANAMSA + PLANETS (SWISS)
+🌌 AYANAMSA + PLANETS
 =================================================== */
 function getAyanamsa(JD){
   swe.set_sid_mode(swe.SE_SIDM_LAHIRI,0,0);
@@ -115,23 +121,14 @@ async function generateChart(){
   $("resultBox").textContent = JSON.stringify({
     JulianDay: JD.toFixed(6),
     LahiriAyanamsa: ayan.toFixed(6)+"°",
-
-    Sun:{
-      SiderealDegree:sunSid.toFixed(6)+"°",
-      ZodiacPosition:degToSign(sunSid)
-    },
-
-    Moon:{
-      SiderealDegree:moonSid.toFixed(6)+"°",
-      ZodiacPosition:degToSign(moonSid)
-    }
-
+    Sun:{ SiderealDegree:sunSid.toFixed(6)+"°", ZodiacPosition:degToSign(sunSid) },
+    Moon:{ SiderealDegree:moonSid.toFixed(6)+"°", ZodiacPosition:degToSign(moonSid) }
   },null,2);
 }
 
 
 /* ===================================================
-⭐ FINAL BUTTON CONNECT FIX (CRITICAL)
+⭐ BUTTON CONNECT
 =================================================== */
 window.addEventListener("load", () => {
 
