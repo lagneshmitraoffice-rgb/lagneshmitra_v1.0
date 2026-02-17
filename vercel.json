@@ -6,19 +6,6 @@
         {
           "key": "Content-Type",
           "value": "application/wasm"
-        },
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        }
-      ]
-    },
-    {
-      "source": "/(.*).wasm",
-      "headers": [
-        {
-          "key": "Content-Type",
-          "value": "application/wasm"
         }
       ]
     }
