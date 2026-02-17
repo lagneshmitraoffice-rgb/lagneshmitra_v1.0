@@ -10,31 +10,24 @@ import {
 window.addEventListener("DOMContentLoaded", ()=>{
 
 /* ================= SAFE GETTER ================= */
-const $ = (id)=>{
-  const el = document.getElementById(id);
-  if(!el) console.error("Missing element:", id);
-  return el;
-};
+const $ = (id)=>document.getElementById(id);
 
 let users = [];
 let currentIndex = 0;
 let currentDocId = null;
 
-const listDiv = $("userList");
+const listDiv = $("lmUserList"); // ⭐ FIXED ID
+
 
 /* =====================================================
-🔥 FINAL LMID GENERATOR (NAME + MOBILE)
-LM + first4letters(name) + first4digits(mobile)
-Example → Abhishek + 97944 → LMABHI9794
+🔥 LMID GENERATOR (NAME + MOBILE)
 =====================================================*/
 function generateLMID(name,mobile){
-
   if(!name) name="USER";
   if(!mobile) mobile="0000000000";
 
   let firstName = name.trim().split(" ")[0].toUpperCase();
   let namePart = firstName.substring(0,4);
-
   while(namePart.length < 4) namePart += "X";
 
   let mobilePart = mobile.substring(0,4);
@@ -42,6 +35,7 @@ function generateLMID(name,mobile){
 
   return "LM" + namePart + mobilePart;
 }
+
 
 /* ================= LOAD USERS ================= */
 async function loadUsers(){
@@ -52,14 +46,14 @@ async function loadUsers(){
     snap.forEach(d => users.push({ id:d.id, ...d.data() }));
 
     renderList();
-
     if(users.length > 0) showUser(0);
 
   }catch(err){
-    console.error("Firestore load error:", err);
+    console.error(err);
     alert("Error loading users");
   }
 }
+
 
 /* ================= LEFT USER LIST ================= */
 function renderList(){
@@ -74,9 +68,9 @@ function renderList(){
   });
 }
 
-/* ================= SHOW USER IN EDITOR ================= */
-function showUser(index){
 
+/* ================= SHOW USER ================= */
+function showUser(index){
   currentIndex = index;
   const u = users[index];
   currentDocId = u.id;
@@ -90,19 +84,15 @@ function showUser(index){
   $("country").value = u.country || "";
 }
 
-/* ================= NAVIGATION ================= */
-$("nextBtn").onclick = ()=>{
-  if(currentIndex < users.length-1) showUser(currentIndex+1);
-};
 
-$("prevBtn").onclick = ()=>{
-  if(currentIndex > 0) showUser(currentIndex-1);
-};
+/* ================= NAVIGATION ================= */
+$("nextBtn").onclick = ()=>{ if(currentIndex < users.length-1) showUser(currentIndex+1); };
+$("prevBtn").onclick = ()=>{ if(currentIndex > 0) showUser(currentIndex-1); };
+
 
 /* ================= ADD USER ================= */
 $("addUserBtn").onclick = ()=>{
   currentDocId = null;
-
   $("lmId").value="";
   $("name").value="";
   $("whatsapp").value="";
@@ -112,9 +102,8 @@ $("addUserBtn").onclick = ()=>{
   $("country").value="";
 };
 
-/* =====================================================
-🔥 AUTO LMID GENERATE WHEN NAME OR MOBILE CHANGES
-=====================================================*/
+
+/* ================= AUTO LMID ================= */
 $("name").addEventListener("input", autoGenerateLMID);
 $("whatsapp").addEventListener("input", autoGenerateLMID);
 
@@ -126,9 +115,9 @@ function autoGenerateLMID(){
   }
 }
 
+
 /* ================= SAVE USER ================= */
 $("saveBtn").onclick = async ()=>{
-
   const data = {
     lmID: $("lmId").value,
     name: $("name").value,
@@ -140,7 +129,6 @@ $("saveBtn").onclick = async ()=>{
   };
 
   try{
-
     if(currentDocId){
       await updateDoc(doc(db,"lm_ideology_user_data",currentDocId),data);
       alert("User Updated ✅");
@@ -148,56 +136,57 @@ $("saveBtn").onclick = async ()=>{
       await addDoc(collection(db,"lm_ideology_user_data"),data);
       alert("User Added 🚀");
     }
-
     loadUsers();
-
   }catch(err){
     console.error(err);
     alert("Save error");
   }
 };
 
+
 /* =====================================================
 📄 EXPORT PDF
 =====================================================*/
-document.getElementById("pdfBtn").onclick = ()=>{
+$("exportPDF").onclick = ()=>{
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+  const pdf = new jsPDF();
 
-  doc.text("LagneshMitra User Report",20,20);
-  let y=40;
+  pdf.setFontSize(18);
+  pdf.text("LagneshMitra User Report",20,20);
 
+  let y = 40;
   users.forEach(u=>{
-    doc.text(`Name: ${u.name}`,20,y); y+=8;
-    doc.text(`Mobile: ${u.whatsapp}`,20,y); y+=8;
-    doc.text(`LMID: ${u.lmID}`,20,y); y+=12;
+    pdf.setFontSize(12);
+    pdf.text(`Name: ${u.name}`,20,y); y+=8;
+    pdf.text(`Mobile: ${u.whatsapp}`,20,y); y+=8;
+    pdf.text(`LMID: ${u.lmID}`,20,y); y+=12;
   });
 
-  doc.save("LM_User_Report.pdf");
+  pdf.save("LM_User_Report.pdf");
 };
+
 
 /* =====================================================
 📊 EXPORT EXCEL
 =====================================================*/
-document.getElementById("excelBtn").onclick = ()=>{
+$("exportExcel").onclick = ()=>{
   const sheet = XLSX.utils.json_to_sheet(users);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, sheet, "Users");
   XLSX.writeFile(wb,"LM_Users.xlsx");
 };
 
+
 /* =====================================================
 📝 EXPORT WORD
 =====================================================*/
-document.getElementById("wordBtn").onclick = ()=>{
+$("exportWord").onclick = ()=>{
   let html = "<h1>LagneshMitra Users</h1>";
 
   users.forEach(u=>{
-    html += `<p>
-      <b>${u.name}</b><br>
-      Mobile: ${u.whatsapp}<br>
-      LMID: ${u.lmID}<br><br>
-    </p>`;
+    html += `<p><b>${u.name}</b><br>
+    Mobile: ${u.whatsapp}<br>
+    LMID: ${u.lmID}</p>`;
   });
 
   const blob = new Blob(['\ufeff', html], {type:'application/msword'});
@@ -208,7 +197,8 @@ document.getElementById("wordBtn").onclick = ()=>{
   a.click();
 };
 
-/* ================= START APP ================= */
+
+/* ================= START ================= */
 loadUsers();
 
 });
