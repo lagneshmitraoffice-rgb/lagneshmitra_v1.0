@@ -7,54 +7,68 @@ import {
   addDoc
 } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-firestore.js";
 
-/* ================= SAFE GETTER ================= */
-const $ = (id) => document.getElementById(id);
+const $ = (id)=>document.getElementById(id);
 
 let users = [];
 let currentIndex = 0;
 let currentDocId = null;
 
-/* ================= LOAD USERS ================= */
-async function loadUsers(){
-  try{
-    const snap = await getDocs(collection(db,"lm_ideology_user_data"));
+const listDiv = $("lmUserList");
 
-    users = [];
-    snap.forEach(d => users.push({ id:d.id, ...d.data() }));
 
-    renderList();
-
-    if(users.length > 0){
-      showUser(0);
-    }
-
-  }catch(err){
-    console.error("Load error:", err);
+/* ================= UID → LMID ================= */
+function generateLMIDfromUID(uid){
+  let sum = 0;
+  for(let i=0;i<uid.length;i++){
+    sum += uid.charCodeAt(i);
   }
+
+  let num = String(sum).slice(-6);
+  while(num.length < 6) num = "0"+num;
+
+  return "LM" + num;
 }
 
-/* ================= RENDER USER LIST ================= */
+
+/* ================= LOAD USERS ================= */
+async function loadUsers(){
+
+  const snap = await getDocs(collection(db,"lm_ideology_user_data"));
+
+  users = [];
+  snap.forEach(d => users.push({ id:d.id, ...d.data() }));
+
+  renderList();
+  if(users.length>0) showUser(0);
+}
+
+
+/* ================= LEFT LIST ================= */
 function renderList(){
-  const listDiv = $("userList");
-  listDiv.innerHTML = "";
+
+  listDiv.innerHTML="";
 
   users.forEach((u,i)=>{
     const div = document.createElement("div");
-    div.className = "userCard";
+    div.className="userCard";
     div.innerHTML = `<b>${u.name || "No Name"}</b>`;
     div.onclick = ()=> showUser(i);
     listDiv.appendChild(div);
   });
+
 }
 
-/* ================= SHOW USER IN EDITOR ================= */
-function showUser(index){
-  currentIndex = index;
 
+/* ================= SHOW USER ================= */
+function showUser(index){
+
+  currentIndex = index;
   const u = users[index];
   currentDocId = u.id;
 
-  $("lmId").value = u.id || "";
+  // 🔥 HERE MAGIC HAPPENS
+  $("lmId").value = generateLMIDfromUID(u.id);
+
   $("name").value = u.name || "";
   $("whatsapp").value = u.whatsapp || "";
   $("dob").value = u.dob || "";
@@ -63,31 +77,30 @@ function showUser(index){
   $("country").value = u.country || "";
 }
 
-/* ================= NAV BUTTONS ================= */
+
+/* ================= NAVIGATION ================= */
 $("nextBtn").onclick = ()=>{
-  if(currentIndex < users.length - 1){
-    showUser(currentIndex + 1);
-  }
+  if(currentIndex < users.length-1) showUser(currentIndex+1);
 };
 
 $("prevBtn").onclick = ()=>{
-  if(currentIndex > 0){
-    showUser(currentIndex - 1);
-  }
+  if(currentIndex > 0) showUser(currentIndex-1);
 };
 
-/* ================= ADD NEW USER ================= */
+
+/* ================= ADD USER ================= */
 $("addUserBtn").onclick = ()=>{
   currentDocId = null;
 
-  $("lmId").value = "";
-  $("name").value = "";
-  $("whatsapp").value = "";
-  $("dob").value = "";
-  $("tob").value = "";
-  $("pob").value = "";
-  $("country").value = "";
+  $("lmId").value="";
+  $("name").value="";
+  $("whatsapp").value="";
+  $("dob").value="";
+  $("tob").value="";
+  $("pob").value="";
+  $("country").value="";
 };
+
 
 /* ================= SAVE USER ================= */
 $("saveBtn").onclick = async ()=>{
@@ -101,23 +114,15 @@ $("saveBtn").onclick = async ()=>{
     country: $("country").value
   };
 
-  try{
-
-    if(currentDocId){
-      await updateDoc(doc(db,"lm_ideology_user_data",currentDocId), data);
-      alert("User Updated ✅");
-    }else{
-      await addDoc(collection(db,"lm_ideology_user_data"), data);
-      alert("User Added 🚀");
-    }
-
-    loadUsers();
-
-  }catch(err){
-    console.error(err);
-    alert("Save error");
+  if(currentDocId){
+    await updateDoc(doc(db,"lm_ideology_user_data",currentDocId),data);
+    alert("User Updated ✅");
+  }else{
+    await addDoc(collection(db,"lm_ideology_user_data"),data);
+    alert("User Added 🚀");
   }
+
+  loadUsers();
 };
 
-/* ================= START ================= */
-window.addEventListener("DOMContentLoaded", loadUsers);
+loadUsers();
