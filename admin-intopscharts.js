@@ -83,7 +83,8 @@ function getSunLongitude(JD){
 
 
 /* ===================================================
-   🌙 FINAL MOON LONGITUDE (Meeus + Evection + Variation)
+   🌙 HIGH PRECISION MOON LONGITUDE (Phase-1)
+   Accuracy ≈ ±0.3°
 =================================================== */
 function getMoonLongitude(JD){
 
@@ -93,32 +94,43 @@ function getMoonLongitude(JD){
   let M  = 357.5291092 + 0.98560028 * D;
   let M1 = 134.9633964 + 13.06499295 * D;
   let Dm = 297.8501921 + 12.19074912 * D;
+  let F  = 93.2720950  + 13.22935024 * D;
 
   L0 = norm360(L0);
   M  = norm360(M);
   M1 = norm360(M1);
   Dm = norm360(Dm);
+  F  = norm360(F);
 
-  const Evection = 1.2739 * Math.sin(deg2rad(2*Dm - M1));
-  const AnnualEq = 0.1858 * Math.sin(deg2rad(M));
-  const A3       = 0.37   * Math.sin(deg2rad(M));
+  let lon = L0;
 
-  const M1prime = M1 + Evection - AnnualEq - A3;
+  lon += 6.288774 * Math.sin(deg2rad(M1));
+  lon += 1.274027 * Math.sin(deg2rad(2*Dm - M1));
+  lon += 0.658314 * Math.sin(deg2rad(2*Dm));
+  lon += 0.213618 * Math.sin(deg2rad(2*M1));
+  lon -= 0.185116 * Math.sin(deg2rad(M));
+  lon -= 0.114332 * Math.sin(deg2rad(2*F));
 
-  const Ec = 6.2886 * Math.sin(deg2rad(M1prime));
-  const A4 = 0.214  * Math.sin(deg2rad(2*M1prime));
-
-  let lon = L0 + Evection + Ec - AnnualEq + A4;
-
-  const Variation = 0.6583 * Math.sin(deg2rad(2*(lon - L0)));
-  lon += Variation;
+  lon += 0.058793 * Math.sin(deg2rad(2*(Dm - M1)));
+  lon += 0.057066 * Math.sin(deg2rad(2*Dm - M - M1));
+  lon += 0.053322 * Math.sin(deg2rad(2*Dm + M1));
+  lon += 0.045758 * Math.sin(deg2rad(2*Dm - M));
+  lon -= 0.040923 * Math.sin(deg2rad(M - M1));
+  lon -= 0.034720 * Math.sin(deg2rad(Dm));
+  lon -= 0.030383 * Math.sin(deg2rad(M + M1));
+  lon += 0.015327 * Math.sin(deg2rad(2*(Dm - F)));
+  lon -= 0.012528 * Math.sin(deg2rad(2*F + M1));
+  lon += 0.010980 * Math.sin(deg2rad(2*F - M1));
+  lon += 0.010675 * Math.sin(deg2rad(4*Dm - M1));
+  lon += 0.010034 * Math.sin(deg2rad(3*M1));
+  lon += 0.008548 * Math.sin(deg2rad(4*Dm - 2*M1));
 
   return norm360(lon);
 }
 
 
 /* ===================================================
-   🌌 LAHIRI AYANAMSA (Dynamic)
+   🌌 LAHIRI AYANAMSA
 =================================================== */
 function getLahiriAyanamsa(JD){
   const t = (JD - 2451545.0) / 36525;
@@ -127,13 +139,15 @@ function getLahiriAyanamsa(JD){
 
 
 /* ===================================================
-   🔥 MAIN CHART GENERATOR (FINAL)
+   🔥 MAIN CHART GENERATOR
 =================================================== */
 function generateChart(){
 
   const name = $("name").value;
   const dob  = $("dob").value;
   const tob  = $("tob").value;
+  const pob  = $("pob").value;
+  const country = $("country").value;
 
   if(!dob || !tob){
     alert("DOB and TOB required");
@@ -150,7 +164,7 @@ function generateChart(){
   const siderealMoon = norm360(tropicalMoon - ayanamsa);
 
   const chartObject = {
-    name,
+    name, dob, tob, pob, country,
     JulianDay: JD.toFixed(6),
 
     Sun: {
@@ -168,4 +182,4 @@ function generateChart(){
 
   $("resultBox").textContent =
     JSON.stringify(chartObject, null, 2);
-}
+    }
