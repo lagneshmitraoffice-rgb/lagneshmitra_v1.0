@@ -1,25 +1,19 @@
 console.log("Real Astro Engine Loaded 🚀");
 
 const $ = id => document.getElementById(id);
-
-/* ================= CLICK EVENT ================= */
 $("generateBtn").addEventListener("click", generateChart);
 
 /* ===================================================
    📅 JULIAN DAY CALCULATION (ACCURATE)
 =================================================== */
 function getJulianDay(dob, tob){
-
   const [year,month,day] = dob.split("-").map(Number);
   const [hour,min] = tob.split(":").map(Number);
 
   let Y = year;
   let M = month;
 
-  if(M <= 2){
-    Y -= 1;
-    M += 12;
-  }
+  if(M <= 2){ Y -= 1; M += 12; }
 
   const A = Math.floor(Y/100);
   const B = 2 - A + Math.floor(A/4);
@@ -47,28 +41,22 @@ function norm360(x){
    ♈ DEGREE → SIGN CONVERTER
 =================================================== */
 function degToSign(deg){
-
   const signs = [
     "Aries","Taurus","Gemini","Cancer","Leo","Virgo",
     "Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"
   ];
-
   const signIndex = Math.floor(deg / 30);
   const signDegree = deg % 30;
-
   return `${signs[signIndex]} ${signDegree.toFixed(2)}°`;
 }
 
 /* ===================================================
-   ☀️ REAL SUN LONGITUDE (Astronomy)
+   ☀️ SUN LONGITUDE (Astronomy)
 =================================================== */
 function getSunLongitude(JD){
-
   const n = JD - 2451545.0;
-
-  let L = 280.460 + 0.9856474 * n;   // mean longitude
-  let g = 357.528 + 0.9856003 * n;   // mean anomaly
-
+  let L = 280.460 + 0.9856474 * n;
+  let g = 357.528 + 0.9856003 * n;
   L = norm360(L);
   g = norm360(g);
 
@@ -77,24 +65,46 @@ function getSunLongitude(JD){
     + 1.915 * Math.sin(deg2rad(g))
     + 0.020 * Math.sin(deg2rad(2*g));
 
-  return norm360(lambda); // tropical sun
+  return norm360(lambda);
 }
 
 /* ===================================================
-   🌌 REAL LAHIRI AYANAMSA (DYNAMIC)
-   Lahiri ≈ 22°27' in 1950
-   + 50.29 arcsec/year precession
+   🌙 MOON LONGITUDE (Meeus simplified)
+=================================================== */
+function getMoonLongitude(JD){
+
+  const D = JD - 2451545.0;
+
+  let L = 218.316 + 13.176396 * D;
+  let D_moon = 297.850 + 12.190749 * D;
+  let M = 357.529 + 0.98560028 * D;
+  let M_moon = 134.963 + 13.064993 * D;
+  let F = 93.272 + 13.229350 * D;
+
+  L = norm360(L);
+  D_moon = norm360(D_moon);
+  M = norm360(M);
+  M_moon = norm360(M_moon);
+  F = norm360(F);
+
+  const lon =
+      L
+    + 6.289 * Math.sin(deg2rad(M_moon))
+    + 1.274 * Math.sin(deg2rad(2*D_moon - M_moon))
+    + 0.658 * Math.sin(deg2rad(2*D_moon))
+    + 0.214 * Math.sin(deg2rad(2*M_moon))
+    - 0.186 * Math.sin(deg2rad(M))
+    - 0.114 * Math.sin(deg2rad(2*F));
+
+  return norm360(lon);
+}
+
+/* ===================================================
+   🌌 LAHIRI AYANAMSA (Dynamic)
 =================================================== */
 function getLahiriAyanamsa(JD){
-
-  const t = (JD - 2451545.0) / 36525;  // centuries from J2000
-
-  const ayan =
-      22.460148
-    + 1.396042*t
-    + 0.000087*t*t;
-
-  return ayan;
+  const t = (JD - 2451545.0) / 36525;
+  return 22.460148 + 1.396042*t + 0.000087*t*t;
 }
 
 /* ===================================================
@@ -114,29 +124,34 @@ function generateChart(){
   }
 
   const JD = getJulianDay(dob, tob);
-
-  /* SUN CALCULATION */
-  const tropicalSun = getSunLongitude(JD);
   const ayanamsa = getLahiriAyanamsa(JD);
+
+  /* SUN */
+  const tropicalSun = getSunLongitude(JD);
   const siderealSun = norm360(tropicalSun - ayanamsa);
 
-  const chartObject = {
-    name,
-    dob,
-    tob,
-    pob,
-    country,
+  /* MOON */
+  const tropicalMoon = getMoonLongitude(JD);
+  const siderealMoon = norm360(tropicalMoon - ayanamsa);
 
+  const chartObject = {
+    name, dob, tob, pob, country,
     JulianDay: JD.toFixed(6),
 
     Sun: {
-      TropicalDegree: tropicalSun.toFixed(6) + "°",
-      SiderealDegree: siderealSun.toFixed(6) + "°",
-      ZodiacPosition: degToSign(siderealSun),
-      LahiriAyanamsa: ayanamsa.toFixed(6) + "°"
-    }
+      TropicalDegree: tropicalSun.toFixed(6)+"°",
+      SiderealDegree: siderealSun.toFixed(6)+"°",
+      ZodiacPosition: degToSign(siderealSun)
+    },
+
+    Moon: {
+      TropicalDegree: tropicalMoon.toFixed(6)+"°",
+      SiderealDegree: siderealMoon.toFixed(6)+"°",
+      ZodiacPosition: degToSign(siderealMoon)
+    },
+
+    LahiriAyanamsa: ayanamsa.toFixed(6)+"°"
   };
 
-  $("resultBox").textContent =
-    JSON.stringify(chartObject, null, 2);
+  $("resultBox").textContent = JSON.stringify(chartObject, null, 2);
 }
