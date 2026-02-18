@@ -1,7 +1,5 @@
 console.log("REAL VEDIC ASTRO ENGINE LOADED 🚀");
 
-import SwissEph from "./astro/swisseph.js";
-
 /* 🔥 FORCE BROWSER MODE (EMS FIX) */
 window.process = undefined;
 window.require = undefined;
@@ -15,13 +13,13 @@ let swe = null;
 let SWE_READY = false;
 
 /* ===================================================
-🚀 SWISS EPHEMERIS LOADER (FINAL FINAL)
+🚀 SWISS EPHEMERIS LOADER (FINAL FINAL FINAL)
 =================================================== */
 async function initSwissEph(){
   try{
-    swe = new SwissEph();
+    // ⭐ SwissEph now comes from global script (NO IMPORT)
+    swe = new window.SwissEph();
 
-    // ⭐ ONLY THIS IS REQUIRED ⭐
     await swe.initSwissEph({
       locateFile: file => "/astro/" + file
     });
@@ -31,19 +29,22 @@ async function initSwissEph(){
     $("resultBox").textContent = "Swiss Ephemeris Ready ✅";
 
   }catch(err){
-    console.error(err);
+    console.error("SwissEph ERROR:", err);
     $("resultBox").textContent =
       "❌ Swiss Ephemeris failed to load.";
   }
 }
 initSwissEph();
 
+
 /* ================= JULIAN DAY ================= */
 function getJulianDay(dob, tob){
   const [year,month,day] = dob.split("-").map(Number);
   let [hour,min] = tob.split(":").map(Number);
 
-  hour -= 5; min -= 30;
+  // IST → UTC
+  hour -= 5; 
+  min  -= 30;
   if(min < 0){ min += 60; hour -= 1; }
   if(hour < 0){ hour += 24; }
 
@@ -60,6 +61,8 @@ function getJulianDay(dob, tob){
     + (hour + min/60)/24;
 }
 
+
+/* ================= AYANAMSA + PLANETS ================= */
 function getAyanamsa(JD){
   swe.set_sid_mode(swe.SE_SIDM_LAHIRI,0,0);
   return swe.get_ayanamsa_ut(JD);
@@ -81,8 +84,10 @@ function degToSign(deg){
   return `${signs[Math.floor(deg/30)]} ${(deg%30).toFixed(2)}°`;
 }
 
-/* ================= GENERATE ================= */
+
+/* ================= GENERATE CHART ================= */
 async function generateChart(){
+
   if(!SWE_READY){
     alert("Swiss Ephemeris loading… wait 2 sec");
     return;
@@ -106,7 +111,8 @@ async function generateChart(){
   },null,2);
 }
 
-/* BUTTON CONNECT */
+
+/* ================= BUTTON CONNECT ================= */
 window.addEventListener("load", () => {
   document.getElementById("generateBtn").onclick = generateChart;
 });
