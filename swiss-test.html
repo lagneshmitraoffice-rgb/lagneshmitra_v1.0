@@ -1,35 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Swiss Ephemeris Line Test</title>
+  <title>Swiss Test</title>
 </head>
-
 <body>
-<h1>Swiss Ephemeris Line Test</h1>
-<pre id="log">Booting Swiss Ephemeris...</pre>
 
+<h1 id="status">Booting Swiss Ephemeris...</h1>
+
+<!-- ⭐ STEP 1 — DEFINE EMSCRIPTEN MODULE FIRST -->
 <script>
-/* FORCE BROWSER MODE */
-window.process = undefined;
-_topics = undefined;
-window.require = undefined;
-window.module  = undefined;
-window.exports = undefined;
+  var Module = {
+    locateFile: function(file) {
+      console.log("Loading file:", file);
+      return "/" + file;   // ⭐ ROOT PATH FORCE
+    },
 
-/* ⭐ CREATE EMSCRIPTEN MODULE BEFORE LOADING SCRIPT ⭐ */
-var Module = {
-  locateFile: function(file) {
-    return "/" + file;
-  },
-  onRuntimeInitialized: function () {
-    document.getElementById("log").textContent =
-      "Swiss Ephemeris Ready ✅🔥";
-  }
-};
+    onRuntimeInitialized: function() {
+      document.getElementById("status").innerHTML =
+        "Swiss Ephemeris Ready ✅🔥";
+      console.log("WASM INITIALIZED SUCCESS");
+    }
+  };
 </script>
 
-<!-- ⭐ LOAD SWISSEPH AFTER MODULE -->
+<!-- ⭐ STEP 2 — LOAD SWISSEPH -->
 <script src="/swisseph.js"></script>
 
 </body>
