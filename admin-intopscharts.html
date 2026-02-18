@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <!-- CSS -->
-<link rel="stylesheet" href="/admin-intopscharts.css?v=3">
+<link rel="stylesheet" href="/admin-intopscharts.css?v=4">
 
 </head>
 
@@ -43,17 +43,22 @@
 
       <div class="resultCard">
         <h2>Generated Chart Object</h2>
-        <pre id="resultBox">Loading Swiss Ephemeris…</pre>
+        <pre id="resultBox">Initializing...</pre>
       </div>
 
   </main>
 </div>
 
-<!-- ⭐ STEP 1 — LOAD SWISS EPHEMERIS FIRST (GLOBAL SCRIPT) -->
-<script src="/astro/swisseph.js"></script>
+<!-- =========================
+STEP 1: LOAD SWISSEPH (GLOBAL)
+IMPORTANT: defer lagao
+========================= -->
+<script src="/astro/swisseph.js" defer></script>
 
-<!-- ⭐ STEP 2 — LOAD OUR ENGINE AFTER -->
-<script src="/admin-intopscharts.js?v=3"></script>
+<!-- =========================
+STEP 2: LOAD ENGINE AFTER
+========================= -->
+<script src="/admin-intopscharts.js?v=4" defer></script>
 
 </body>
 </html>
