@@ -5,8 +5,8 @@
 <title>LM Internal Astro Engine</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- ⭐ CSS FROM ROOT -->
-<link rel="stylesheet" href="/admin-intopscharts.css?v=2">
+<!-- CSS -->
+<link rel="stylesheet" href="/admin-intopscharts.css?v=3">
 
 </head>
 
@@ -49,8 +49,11 @@
   </main>
 </div>
 
-<!-- ⭐⭐⭐ HARD CACHE RESET SCRIPT LOAD ⭐⭐⭐ -->
-<script type="module" src="/admin-intopscharts.js?v=2"></script>
+<!-- ⭐ STEP 1 — LOAD SWISS EPHEMERIS FIRST (GLOBAL SCRIPT) -->
+<script src="/astro/swisseph.js"></script>
+
+<!-- ⭐ STEP 2 — LOAD OUR ENGINE AFTER -->
+<script src="/admin-intopscharts.js?v=3"></script>
 
 </body>
 </html>
