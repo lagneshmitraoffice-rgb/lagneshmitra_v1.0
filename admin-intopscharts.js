@@ -1,6 +1,6 @@
 console.log("REAL VEDIC ASTRO ENGINE LOADED 🚀");
 
-/* 🔥 FORCE BROWSER MODE (EMS FIX) */
+/* FORCE BROWSER MODE (Emscripten Fix) */
 window.process = undefined;
 window.require = undefined;
 window.module  = undefined;
@@ -13,41 +13,21 @@ let SWE_READY = false;
 
 
 /* ===================================================
-🚀 WAIT FOR SWISSEPH SCRIPT TO LOAD
-=================================================== */
-async function waitForSwissEph(){
-  return new Promise((resolve,reject)=>{
-    let tries = 0;
-
-    const timer = setInterval(()=>{
-      if(window.SwissEph){
-        clearInterval(timer);
-        resolve();
-      }
-      tries++;
-      if(tries > 50){
-        clearInterval(timer);
-        reject("SwissEph script not found");
-      }
-    },100);
-  });
-}
-
-
-/* ===================================================
-🚀 SWISS EPHEMERIS INIT (FINAL)
+🚀 SWISS EPHEMERIS INIT (FINAL CLEAN)
 =================================================== */
 async function initSwissEph(){
   try{
     $("resultBox").textContent = "Loading Swiss Ephemeris…";
 
-    await waitForSwissEph();   // ⭐ important
+    // SwissEph already loaded globally from HTML
+    if(!window.SwissEph){
+      throw new Error("SwissEph script not loaded");
+    }
 
     swe = new window.SwissEph();
 
-    await swe.initSwissEph({
-      locateFile: file => "/astro/" + file
-    });
+    // ⭐ IMPORTANT — NO CONFIG HERE
+    await swe.initSwissEph();
 
     SWE_READY = true;
     console.log("Swiss Ephemeris Ready ✅");
@@ -88,7 +68,7 @@ function getJulianDay(dob, tob){
 
 
 /* ===================================================
-🌌 PLANET CALCULATIONS
+🌌 PLANET CALCULATIONS (SWISS)
 =================================================== */
 function getAyanamsa(JD){
   swe.set_sid_mode(swe.SE_SIDM_LAHIRI,0,0);
@@ -154,7 +134,7 @@ async function generateChart(){
 
 
 /* ===================================================
-🚀 APP START (SINGLE ENTRY POINT)
+🚀 APP START (SINGLE ENTRY)
 =================================================== */
 window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("generateBtn").onclick = generateChart;
