@@ -1,23 +1,25 @@
 console.log("REAL VEDIC ASTRO ENGINE LOADED 🚀");
 
-/* 🔥 FORCE BROWSER MODE (EMS FIX) */
+/* FORCE BROWSER MODE (EMS FIX) */
 window.process = undefined;
 window.require = undefined;
 window.module  = undefined;
 window.exports = undefined;
-/* -------------------------------- */
 
 const $ = id => document.getElementById(id);
 
 let swe = null;
 let SWE_READY = false;
 
-/* ===================================================
-🚀 SWISS EPHEMERIS LOADER (FINAL FINAL FINAL)
-=================================================== */
+/* ================= SWISS LOADER ================= */
 async function initSwissEph(){
   try{
-    // ⭐ SwissEph now comes from global script (NO IMPORT)
+
+    // SwissEph must already be loaded globally
+    if(!window.SwissEph){
+      throw new Error("SwissEph not found on window");
+    }
+
     swe = new window.SwissEph();
 
     await swe.initSwissEph({
@@ -34,7 +36,8 @@ async function initSwissEph(){
       "❌ Swiss Ephemeris failed to load.";
   }
 }
-initSwissEph();
+
+window.addEventListener("load", initSwissEph);
 
 
 /* ================= JULIAN DAY ================= */
@@ -42,7 +45,6 @@ function getJulianDay(dob, tob){
   const [year,month,day] = dob.split("-").map(Number);
   let [hour,min] = tob.split(":").map(Number);
 
-  // IST → UTC
   hour -= 5; 
   min  -= 30;
   if(min < 0){ min += 60; hour -= 1; }
@@ -62,7 +64,7 @@ function getJulianDay(dob, tob){
 }
 
 
-/* ================= AYANAMSA + PLANETS ================= */
+/* ================= PLANET CALCS ================= */
 function getAyanamsa(JD){
   swe.set_sid_mode(swe.SE_SIDM_LAHIRI,0,0);
   return swe.get_ayanamsa_ut(JD);
@@ -79,13 +81,15 @@ function getRealMoon(JD){
 function norm360(x){ x%=360; if(x<0)x+=360; return x; }
 
 function degToSign(deg){
-  const signs=["Aries","Taurus","Gemini","Cancer","Leo","Virgo",
-  "Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"];
+  const signs=[
+    "Aries","Taurus","Gemini","Cancer","Leo","Virgo",
+    "Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"
+  ];
   return `${signs[Math.floor(deg/30)]} ${(deg%30).toFixed(2)}°`;
 }
 
 
-/* ================= GENERATE CHART ================= */
+/* ================= GENERATE ================= */
 async function generateChart(){
 
   if(!SWE_READY){
@@ -95,7 +99,11 @@ async function generateChart(){
 
   const dob=$("dob").value;
   const tob=$("tob").value;
-  if(!dob||!tob){ alert("DOB & TOB required"); return; }
+
+  if(!dob||!tob){
+    alert("DOB & TOB required");
+    return;
+  }
 
   const JD   = getJulianDay(dob,tob);
   const ayan = getAyanamsa(JD);
@@ -106,13 +114,19 @@ async function generateChart(){
   $("resultBox").textContent = JSON.stringify({
     JulianDay: JD.toFixed(6),
     LahiriAyanamsa: ayan.toFixed(6)+"°",
-    Sun:{ SiderealDegree:sunSid.toFixed(6)+"°", ZodiacPosition:degToSign(sunSid) },
-    Moon:{ SiderealDegree:moonSid.toFixed(6)+"°", ZodiacPosition:degToSign(moonSid) }
+    Sun:{ 
+      SiderealDegree:sunSid.toFixed(6)+"°", 
+      ZodiacPosition:degToSign(sunSid) 
+    },
+    Moon:{ 
+      SiderealDegree:moonSid.toFixed(6)+"°", 
+      ZodiacPosition:degToSign(moonSid) 
+    }
   },null,2);
 }
 
 
-/* ================= BUTTON CONNECT ================= */
+/* ================= BUTTON ================= */
 window.addEventListener("load", () => {
   document.getElementById("generateBtn").onclick = generateChart;
 });
