@@ -2,12 +2,12 @@ console.log("REAL VEDIC ASTRO ENGINE LOADED 🚀");
 
 import SwissEph from "./astro/swisseph.js";
 
-/* 🔥🔥🔥 CRITICAL FIX — FORCE BROWSER MODE (EMSCRIPTEN BUG FIX) */
+/* 🔥 CRITICAL — FORCE BROWSER MODE (Emscripten Fix) */
 window.process = undefined;
 window.require = undefined;
 window.module  = undefined;
 window.exports = undefined;
-/* 🔥🔥🔥 */
+/* ------------------------------------------------ */
 
 const $ = id => document.getElementById(id);
 
@@ -15,18 +15,20 @@ let swe = null;
 let SWE_READY = false;
 
 /* ===================================================
-🚀 SWISS EPHEMERIS LOADER (FINAL)
+🚀 SWISS EPHEMERIS LOADER — FINAL ABSOLUTE PATH FIX
 =================================================== */
 async function initSwissEph(){
   try{
-
     swe = new SwissEph();
 
+    // ⭐⭐ FINAL ABSOLUTE PATH SOLUTION ⭐⭐
+    const BASE = window.location.origin + "/astro/";
+
     await swe.initSwissEph({
-      scriptDirectory: window.location.origin + "/astro/",
-      wasmBinaryFile: "./astro/swisseph.wasm",
-      dataFile: "./astro/swisseph.data",
-      locateFile: file => "./astro/" + file
+      scriptDirectory: BASE,
+      wasmBinaryFile: BASE + "swisseph.wasm",
+      dataFile: BASE + "swisseph.data",
+      locateFile: file => BASE + file
     });
 
     SWE_READY = true;
@@ -36,7 +38,7 @@ async function initSwissEph(){
   }catch(err){
     console.error("SwissEph FAILED:", err);
     $("resultBox").textContent =
-      "❌ Swiss Ephemeris failed to load.\nWASM runtime error.";
+      "❌ Swiss Ephemeris failed to load.\nCheck /astro path.";
   }
 }
 initSwissEph();
@@ -50,6 +52,7 @@ function getJulianDay(dob, tob){
   const [year,month,day] = dob.split("-").map(Number);
   let [hour,min] = tob.split(":").map(Number);
 
+  // IST → UTC
   hour -= 5;
   min  -= 30;
   if(min < 0){ min += 60; hour -= 1; }
@@ -70,7 +73,7 @@ function getJulianDay(dob, tob){
 
 
 /* ===================================================
-🌌 AYANAMSA + PLANETS
+🌌 AYANAMSA + PLANETS (SWISS EPHEMERIS)
 =================================================== */
 function getAyanamsa(JD){
   swe.set_sid_mode(swe.SE_SIDM_LAHIRI,0,0);
@@ -85,6 +88,8 @@ function getRealMoon(JD){
   return swe.calc_ut(JD, swe.SE_MOON, swe.SEFLG_SWIEPH).longitude;
 }
 
+
+/* ================= HELPERS ================= */
 function norm360(x){ x%=360; if(x<0)x+=360; return x; }
 
 function degToSign(deg){
@@ -95,7 +100,7 @@ function degToSign(deg){
 
 
 /* ===================================================
-🔥 MAIN GENERATOR
+🔥 MAIN CHART GENERATOR
 =================================================== */
 async function generateChart(){
 
@@ -121,14 +126,23 @@ async function generateChart(){
   $("resultBox").textContent = JSON.stringify({
     JulianDay: JD.toFixed(6),
     LahiriAyanamsa: ayan.toFixed(6)+"°",
-    Sun:{ SiderealDegree:sunSid.toFixed(6)+"°", ZodiacPosition:degToSign(sunSid) },
-    Moon:{ SiderealDegree:moonSid.toFixed(6)+"°", ZodiacPosition:degToSign(moonSid) }
+
+    Sun:{
+      SiderealDegree:sunSid.toFixed(6)+"°",
+      ZodiacPosition:degToSign(sunSid)
+    },
+
+    Moon:{
+      SiderealDegree:moonSid.toFixed(6)+"°",
+      ZodiacPosition:degToSign(moonSid)
+    }
+
   },null,2);
 }
 
 
 /* ===================================================
-⭐ BUTTON CONNECT
+⭐ BUTTON CONNECT (FINAL)
 =================================================== */
 window.addEventListener("load", () => {
 
