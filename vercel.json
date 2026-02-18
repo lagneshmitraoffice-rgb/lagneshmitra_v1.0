@@ -2,18 +2,23 @@
   "headers": [
 
     {
+      "source": "/astro/(.*)",
+      "headers": [
+        { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" }
+      ]
+    },
+
+    {
       "source": "/astro/swisseph.wasm",
       "headers": [
-        { "key": "Content-Type", "value": "application/wasm" },
-        { "key": "Cross-Origin-Resource-Policy", "value": "cross-origin" }
+        { "key": "Content-Type", "value": "application/wasm" }
       ]
     },
 
     {
       "source": "/astro/swisseph.data",
       "headers": [
-        { "key": "Content-Type", "value": "application/octet-stream" },
-        { "key": "Cross-Origin-Resource-Policy", "value": "cross-origin" }
+        { "key": "Content-Type", "value": "application/octet-stream" }
       ]
     },
 
