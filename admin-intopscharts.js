@@ -1,6 +1,6 @@
 console.log("REAL VEDIC ASTRO ENGINE LOADED 🚀");
 
-/* FORCE BROWSER MODE (EMS FIX) */
+/* 🔥 FORCE BROWSER MODE (EMS FIX) */
 window.process = undefined;
 window.require = undefined;
 window.module  = undefined;
@@ -11,14 +11,37 @@ const $ = id => document.getElementById(id);
 let swe = null;
 let SWE_READY = false;
 
-/* ================= SWISS LOADER ================= */
+
+/* ===================================================
+🚀 WAIT FOR SWISSEPH SCRIPT TO LOAD
+=================================================== */
+async function waitForSwissEph(){
+  return new Promise((resolve,reject)=>{
+    let tries = 0;
+
+    const timer = setInterval(()=>{
+      if(window.SwissEph){
+        clearInterval(timer);
+        resolve();
+      }
+      tries++;
+      if(tries > 50){
+        clearInterval(timer);
+        reject("SwissEph script not found");
+      }
+    },100);
+  });
+}
+
+
+/* ===================================================
+🚀 SWISS EPHEMERIS INIT (FINAL)
+=================================================== */
 async function initSwissEph(){
   try{
+    $("resultBox").textContent = "Loading Swiss Ephemeris…";
 
-    // SwissEph must already be loaded globally
-    if(!window.SwissEph){
-      throw new Error("SwissEph not found on window");
-    }
+    await waitForSwissEph();   // ⭐ important
 
     swe = new window.SwissEph();
 
@@ -37,10 +60,10 @@ async function initSwissEph(){
   }
 }
 
-window.addEventListener("load", initSwissEph);
 
-
-/* ================= JULIAN DAY ================= */
+/* ===================================================
+📅 JULIAN DAY (IST → UTC)
+=================================================== */
 function getJulianDay(dob, tob){
   const [year,month,day] = dob.split("-").map(Number);
   let [hour,min] = tob.split(":").map(Number);
@@ -64,7 +87,9 @@ function getJulianDay(dob, tob){
 }
 
 
-/* ================= PLANET CALCS ================= */
+/* ===================================================
+🌌 PLANET CALCULATIONS
+=================================================== */
 function getAyanamsa(JD){
   swe.set_sid_mode(swe.SE_SIDM_LAHIRI,0,0);
   return swe.get_ayanamsa_ut(JD);
@@ -89,11 +114,13 @@ function degToSign(deg){
 }
 
 
-/* ================= GENERATE ================= */
+/* ===================================================
+🔥 GENERATE CHART
+=================================================== */
 async function generateChart(){
 
   if(!SWE_READY){
-    alert("Swiss Ephemeris loading… wait 2 sec");
+    alert("Swiss Ephemeris still loading… wait few seconds");
     return;
   }
 
@@ -126,7 +153,10 @@ async function generateChart(){
 }
 
 
-/* ================= BUTTON ================= */
-window.addEventListener("load", () => {
+/* ===================================================
+🚀 APP START (SINGLE ENTRY POINT)
+=================================================== */
+window.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("generateBtn").onclick = generateChart;
+  await initSwissEph();
 });
