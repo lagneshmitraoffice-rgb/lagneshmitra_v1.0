@@ -1,19 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Swiss Test</title>
+<meta charset="UTF-8">
+<title>Swiss Ephemeris Line Test</title>
 </head>
 
 <body>
-
 <h1>Swiss Ephemeris Line Test</h1>
-<pre id="resultBox">Waiting...</pre>
+<pre id="log">Booting Swiss Ephemeris...</pre>
 
-<!-- STEP 1: load swiss -->
+<script>
+/* FORCE BROWSER MODE */
+window.process = undefined;
+_topics = undefined;
+window.require = undefined;
+window.module  = undefined;
+window.exports = undefined;
+
+/* ⭐ CREATE EMSCRIPTEN MODULE BEFORE LOADING SCRIPT ⭐ */
+var Module = {
+  locateFile: function(file) {
+    return "/" + file;
+  },
+  onRuntimeInitialized: function () {
+    document.getElementById("log").textContent =
+      "Swiss Ephemeris Ready ✅🔥";
+  }
+};
+</script>
+
+<!-- ⭐ LOAD SWISSEPH AFTER MODULE -->
 <script src="/swisseph.js"></script>
-
-<!-- STEP 2: run test -->
-<script src="/swiss-test.js"></script>
 
 </body>
 </html>
