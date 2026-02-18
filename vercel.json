@@ -3,21 +3,10 @@
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
-        { "key": "Cross-Origin-Embedder-Policy", "value": "require-corp" },
-        { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" }
-      ]
-    },
-    {
-      "source": "/swisseph.wasm",
-      "headers": [
-        { "key": "Content-Type", "value": "application/wasm" }
-      ]
-    },
-    {
-      "source": "/swisseph.data",
-      "headers": [
-        { "key": "Content-Type", "value": "application/octet-stream" }
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
       ]
     }
   ]
